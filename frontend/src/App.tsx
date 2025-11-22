@@ -1,0 +1,28 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Navigation from './components/Navigation'
+import Landing from './pages/Landing'
+import Discover from './pages/Discover'
+import Library from './pages/Library'
+import SongDetail from './pages/SongDetail'
+import CreateDashboard from './pages/CreateDashboard'
+import Profile from './pages/Profile'
+
+function App() {
+  return (
+    <Router>
+      <div className="min-h-screen bg-black">
+        <Navigation />
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/discover" element={<Discover />} />
+          <Route path="/library" element={<Library />} />
+          <Route path="/song/:id" element={<SongDetail />} />
+          <Route path="/create" element={<CreateDashboard />} />
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
+      </div>
+    </Router>
+  )
+}
+
+export default App
