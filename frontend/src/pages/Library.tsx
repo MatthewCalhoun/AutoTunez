@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Play, Pause, Heart, Grid3x3, List, Search, SortAsc, Music, Clock, Calendar, MoreHorizontal } from 'lucide-react'
+import { Play, Pause, Heart, Grid3x3, List, Search, Music, Clock, Calendar, MoreHorizontal, Library as LibraryIcon, Disc3, Sparkles } from 'lucide-react'
 
 // Mock library data
 const mockLibrarySongs = [
@@ -7,6 +7,7 @@ const mockLibrarySongs = [
     id: '1',
     title: 'Cosmic Dreams',
     artist: '0x7a...b3c2',
+    artistName: 'Luna Waves',
     album: 'AI Sessions Vol. 1',
     duration: '2:34',
     dateAdded: '2025-01-15',
@@ -17,6 +18,7 @@ const mockLibrarySongs = [
     id: '2',
     title: 'Neon Nights',
     artist: '0x9f...d4e1',
+    artistName: 'SynthMaster',
     album: 'Synthwave Collection',
     duration: '3:45',
     dateAdded: '2025-01-18',
@@ -27,6 +29,7 @@ const mockLibrarySongs = [
     id: '3',
     title: 'Rainfall Meditation',
     artist: '0x2c...a9b8',
+    artistName: 'Zen Garden',
     album: 'Ambient Soundscapes',
     duration: '4:12',
     dateAdded: '2025-01-20',
@@ -37,6 +40,7 @@ const mockLibrarySongs = [
     id: '4',
     title: 'Trap City Vibes',
     artist: '0x5b...c7d2',
+    artistName: 'BeatDrop',
     album: 'Urban Beats',
     duration: '2:58',
     dateAdded: '2025-01-22',
@@ -47,6 +51,7 @@ const mockLibrarySongs = [
     id: '5',
     title: 'Jazz Cafe Mornings',
     artist: '0x8d...f3a1',
+    artistName: 'Smooth Keys',
     album: 'Coffee Shop Jazz',
     duration: '3:21',
     dateAdded: '2025-01-25',
@@ -57,6 +62,7 @@ const mockLibrarySongs = [
     id: '6',
     title: 'Electric Pulse',
     artist: '0x4a...e2b9',
+    artistName: 'Voltage',
     album: 'House Party',
     duration: '3:08',
     dateAdded: '2025-01-28',
@@ -70,7 +76,7 @@ export default function Library() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('songs')
   const [playingId, setPlayingId] = useState<string | null>(null)
-  const [sortBy, setSortBy] = useState('dateAdded')
+  const [isSearchFocused, setIsSearchFocused] = useState(false)
 
   const filteredSongs = mockLibrarySongs.filter(song =>
     song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -78,107 +84,260 @@ export default function Library() {
     song.album.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="flex" style={{ minHeight: 'calc(100vh - 64px)' }}>
-        {/* Sidebar */}
-        <div className="w-64 border-r border-white/10 p-6" style={{ backgroundColor: 'rgba(20, 20, 20, 0.5)' }}>
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Library</h2>
+  const displayedSongs = selectedCategory === 'liked'
+    ? filteredSongs.filter(s => s.isLiked)
+    : filteredSongs
 
-          <div className="space-y-1">
-            <SidebarItem
-              icon={<Music className="h-5 w-5" />}
-              label="Songs"
-              active={selectedCategory === 'songs'}
-              count={mockLibrarySongs.length}
-              onClick={() => setSelectedCategory('songs')}
-            />
-            <SidebarItem
-              icon={<Heart className="h-5 w-5" />}
-              label="Liked Songs"
-              active={selectedCategory === 'liked'}
-              count={mockLibrarySongs.filter(s => s.isLiked).length}
-              onClick={() => setSelectedCategory('liked')}
-            />
-            <SidebarItem
-              icon={<Calendar className="h-5 w-5" />}
-              label="Recently Added"
-              active={selectedCategory === 'recent'}
-              onClick={() => setSelectedCategory('recent')}
-            />
+  return (
+    <div style={{ minHeight: '100vh', background: '#000', color: 'white', position: 'relative', overflow: 'hidden' }}>
+      {/* Animated Background */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+        <div style={{
+          position: 'absolute',
+          top: '10%',
+          left: '60%',
+          width: '500px',
+          height: '500px',
+          background: 'rgba(147, 51, 234, 0.15)',
+          borderRadius: '50%',
+          filter: 'blur(120px)',
+        }} className="animate-pulse-slow" />
+        <div style={{
+          position: 'absolute',
+          bottom: '20%',
+          left: '20%',
+          width: '400px',
+          height: '400px',
+          background: 'rgba(219, 39, 119, 0.1)',
+          borderRadius: '50%',
+          filter: 'blur(120px)',
+        }} className="animate-pulse-slow animation-delay-2000" />
+      </div>
+
+      <div style={{ display: 'flex', minHeight: 'calc(100vh - 64px)', position: 'relative', zIndex: 1 }}>
+        {/* Sidebar */}
+        <div style={{
+          width: '280px',
+          borderRight: '1px solid rgba(255, 255, 255, 0.08)',
+          padding: '32px 24px',
+          background: 'linear-gradient(180deg, rgba(20, 20, 25, 0.8) 0%, rgba(10, 10, 15, 0.9) 100%)',
+          backdropFilter: 'blur(20px)',
+        }}>
+          {/* Library Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #9333ea, #db2777)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <LibraryIcon style={{ width: '20px', height: '20px', color: 'white' }} />
+            </div>
+            <div>
+              <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'white', margin: 0 }}>Your Library</h2>
+              <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>{mockLibrarySongs.length} tracks</p>
+            </div>
           </div>
 
-          <div className="mt-8">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Playlists</h3>
-            <div className="space-y-1">
+          {/* Navigation */}
+          <div style={{ marginBottom: '40px' }}>
+            <p style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>
+              Browse
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <SidebarItem
-                icon={<Music className="h-5 w-5" />}
-                label="Chill Vibes"
-                onClick={() => {}}
+                icon={<Music style={{ width: '18px', height: '18px' }} />}
+                label="All Songs"
+                active={selectedCategory === 'songs'}
+                count={mockLibrarySongs.length}
+                onClick={() => setSelectedCategory('songs')}
               />
               <SidebarItem
-                icon={<Music className="h-5 w-5" />}
-                label="Workout Mix"
-                onClick={() => {}}
+                icon={<Heart style={{ width: '18px', height: '18px' }} />}
+                label="Liked Songs"
+                active={selectedCategory === 'liked'}
+                count={mockLibrarySongs.filter(s => s.isLiked).length}
+                onClick={() => setSelectedCategory('liked')}
+                accentColor="#ec4899"
               />
+              <SidebarItem
+                icon={<Clock style={{ width: '18px', height: '18px' }} />}
+                label="Recently Played"
+                active={selectedCategory === 'recent'}
+                onClick={() => setSelectedCategory('recent')}
+              />
+              <SidebarItem
+                icon={<Disc3 style={{ width: '18px', height: '18px' }} />}
+                label="Albums"
+                active={selectedCategory === 'albums'}
+                onClick={() => setSelectedCategory('albums')}
+              />
+            </div>
+          </div>
+
+          {/* Playlists */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <p style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>
+                Playlists
+              </p>
+              <button style={{
+                background: 'none',
+                border: 'none',
+                color: '#9333ea',
+                fontSize: '20px',
+                cursor: 'pointer',
+                lineHeight: 1,
+              }}>+</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <PlaylistItem label="Chill Vibes" count={12} gradient="from-cyan-500 to-blue-500" />
+              <PlaylistItem label="Workout Mix" count={8} gradient="from-orange-500 to-red-500" />
+              <PlaylistItem label="Late Night Coding" count={15} gradient="from-purple-500 to-pink-500" />
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1">
-          {/* Header Controls */}
-          <div className="border-b border-white/10 p-6" style={{ backgroundColor: 'rgba(20, 20, 20, 0.3)' }}>
-            <div className="flex items-center justify-between mb-6">
-              <h1 className="text-3xl font-bold">
-                {selectedCategory === 'songs' && 'All Songs'}
-                {selectedCategory === 'liked' && 'Liked Songs'}
-                {selectedCategory === 'recent' && 'Recently Added'}
-              </h1>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <div style={{
+            padding: '32px 40px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+            background: 'linear-gradient(180deg, rgba(20, 20, 25, 0.6) 0%, transparent 100%)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '24px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                  <Sparkles style={{ width: '20px', height: '20px', color: '#a855f7' }} />
+                  <span style={{ fontSize: '13px', color: '#9ca3af', fontWeight: '500' }}>Your Collection</span>
+                </div>
+                <h1 style={{
+                  fontSize: '42px',
+                  fontWeight: '800',
+                  margin: 0,
+                  background: selectedCategory === 'liked'
+                    ? 'linear-gradient(135deg, #ec4899, #f43f5e)'
+                    : 'linear-gradient(135deg, #ffffff, #a1a1aa)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}>
+                  {selectedCategory === 'songs' && 'All Songs'}
+                  {selectedCategory === 'liked' && 'Liked Songs'}
+                  {selectedCategory === 'recent' && 'Recently Played'}
+                  {selectedCategory === 'albums' && 'Albums'}
+                </h1>
+                <p style={{ fontSize: '15px', color: '#6b7280', marginTop: '8px' }}>
+                  {displayedSongs.length} tracks • {Math.floor(displayedSongs.reduce((acc, s) => {
+                    const [min, sec] = s.duration.split(':').map(Number)
+                    return acc + min * 60 + sec
+                  }, 0) / 60)} min total
+                </p>
+              </div>
 
-              <div className="flex items-center space-x-4">
-                {/* Search */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search library..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-                    style={{ width: '300px' }}
-                  />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                {/* Search Bar */}
+                <div style={{
+                  position: 'relative',
+                  transition: 'transform 0.3s ease',
+                  transform: isSearchFocused ? 'scale(1.02)' : 'scale(1)',
+                }}>
+                  <div style={{
+                    position: 'absolute',
+                    inset: '-3px',
+                    background: 'linear-gradient(135deg, #9333ea, #ec4899)',
+                    borderRadius: '16px',
+                    filter: 'blur(12px)',
+                    opacity: isSearchFocused ? 0.3 : 0,
+                    transition: 'opacity 0.3s ease',
+                  }} />
+                  <div style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: 'rgba(30, 30, 35, 0.9)',
+                    border: isSearchFocused ? '1px solid rgba(147, 51, 234, 0.4)' : '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '14px',
+                    padding: '0 16px',
+                    transition: 'all 0.3s ease',
+                    width: '280px',
+                  }}>
+                    <Search style={{
+                      width: '18px',
+                      height: '18px',
+                      color: isSearchFocused ? '#a855f7' : '#6b7280',
+                      transition: 'color 0.3s ease',
+                    }} />
+                    <input
+                      type="text"
+                      placeholder="Search your library..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onFocus={() => setIsSearchFocused(true)}
+                      onBlur={() => setIsSearchFocused(false)}
+                      style={{
+                        flex: 1,
+                        padding: '14px 12px',
+                        background: 'transparent',
+                        border: 'none',
+                        outline: 'none',
+                        color: 'white',
+                        fontSize: '14px',
+                      }}
+                      className="placeholder-gray-500"
+                    />
+                  </div>
                 </div>
 
                 {/* View Toggle */}
-                <div className="flex items-center bg-white/5 rounded-lg border border-white/10 p-1">
+                <div style={{
+                  display: 'flex',
+                  background: 'rgba(30, 30, 35, 0.8)',
+                  borderRadius: '12px',
+                  padding: '4px',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                }}>
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-2 rounded ${viewMode === 'list' ? 'bg-purple-600' : 'hover:bg-white/10'}`}
+                    style={{
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      background: viewMode === 'list' ? 'linear-gradient(135deg, #9333ea, #db2777)' : 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                    }}
                   >
-                    <List className="h-4 w-4" />
+                    <List style={{ width: '18px', height: '18px', color: 'white' }} />
                   </button>
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded ${viewMode === 'grid' ? 'bg-purple-600' : 'hover:bg-white/10'}`}
+                    style={{
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      background: viewMode === 'grid' ? 'linear-gradient(135deg, #9333ea, #db2777)' : 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                    }}
                   >
-                    <Grid3x3 className="h-4 w-4" />
+                    <Grid3x3 style={{ width: '18px', height: '18px', color: 'white' }} />
                   </button>
                 </div>
               </div>
             </div>
-
-            <div className="text-sm text-gray-400">
-              {filteredSongs.length} songs
-            </div>
           </div>
 
           {/* Content Area */}
-          <div className="p-6">
+          <div style={{ flex: 1, padding: '24px 40px', overflowY: 'auto' }}>
             {viewMode === 'list' ? (
-              <ListView songs={filteredSongs} playingId={playingId} setPlayingId={setPlayingId} />
+              <ListView songs={displayedSongs} playingId={playingId} setPlayingId={setPlayingId} />
             ) : (
-              <GridView songs={filteredSongs} playingId={playingId} setPlayingId={setPlayingId} />
+              <GridView songs={displayedSongs} playingId={playingId} setPlayingId={setPlayingId} />
             )}
           </div>
         </div>
@@ -187,48 +346,131 @@ export default function Library() {
   )
 }
 
-function SidebarItem({ icon, label, active, count, onClick }: { icon: React.ReactNode; label: string; active?: boolean; count?: number; onClick: () => void }) {
+function SidebarItem({ icon, label, active, count, onClick, accentColor }: {
+  icon: React.ReactNode
+  label: string
+  active?: boolean
+  count?: number
+  onClick: () => void
+  accentColor?: string
+}) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
-        active ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
-      }`}
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '12px 14px',
+        borderRadius: '12px',
+        background: active
+          ? accentColor
+            ? `linear-gradient(135deg, ${accentColor}20, ${accentColor}10)`
+            : 'rgba(147, 51, 234, 0.15)'
+          : 'transparent',
+        border: active
+          ? `1px solid ${accentColor || 'rgba(147, 51, 234, 0.3)'}`
+          : '1px solid transparent',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+      }}
+      className={active ? '' : 'hover:bg-white/5'}
     >
-      <div className="flex items-center space-x-3">
-        {icon}
-        <span className="text-sm font-medium">{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <span style={{ color: active ? (accentColor || '#a855f7') : '#9ca3af' }}>{icon}</span>
+        <span style={{
+          fontSize: '14px',
+          fontWeight: active ? '600' : '500',
+          color: active ? 'white' : '#9ca3af',
+        }}>{label}</span>
       </div>
       {count !== undefined && (
-        <span className="text-xs text-gray-500">{count}</span>
+        <span style={{
+          fontSize: '12px',
+          fontWeight: '600',
+          color: active ? (accentColor || '#a855f7') : '#6b7280',
+          background: active ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+          padding: '2px 8px',
+          borderRadius: '6px',
+        }}>{count}</span>
       )}
+    </button>
+  )
+}
+
+function PlaylistItem({ label, count, gradient }: { label: string; count: number; gradient: string }) {
+  return (
+    <button
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '10px 14px',
+        borderRadius: '10px',
+        background: 'transparent',
+        border: '1px solid transparent',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+      }}
+      className="hover:bg-white/5"
+    >
+      <div
+        className={`bg-gradient-to-br ${gradient}`}
+        style={{
+          width: '36px',
+          height: '36px',
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Music style={{ width: '16px', height: '16px', color: 'white' }} />
+      </div>
+      <div style={{ flex: 1, textAlign: 'left' }}>
+        <p style={{ fontSize: '13px', fontWeight: '500', color: 'white', margin: 0 }}>{label}</p>
+        <p style={{ fontSize: '11px', color: '#6b7280', margin: 0 }}>{count} songs</p>
+      </div>
     </button>
   )
 }
 
 function ListView({ songs, playingId, setPlayingId }: { songs: typeof mockLibrarySongs; playingId: string | null; setPlayingId: (id: string | null) => void }) {
   return (
-    <div className="space-y-1">
+    <div>
       {/* Table Header */}
-      <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs text-gray-400 uppercase tracking-wider border-b border-white/10">
-        <div className="col-span-1">#</div>
-        <div className="col-span-5">Title</div>
-        <div className="col-span-2">Album</div>
-        <div className="col-span-2">Date Added</div>
-        <div className="col-span-1"><Clock className="h-4 w-4" /></div>
-        <div className="col-span-1"></div>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '50px 2fr 1.5fr 1fr 80px 60px',
+        gap: '16px',
+        padding: '12px 20px',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        marginBottom: '8px',
+      }}>
+        <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>#</span>
+        <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Title</span>
+        <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Album</span>
+        <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date Added</span>
+        <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>
+          <Clock style={{ width: '14px', height: '14px' }} />
+        </span>
+        <span></span>
       </div>
 
       {/* Song Rows */}
-      {songs.map((song, index) => (
-        <SongRow
-          key={song.id}
-          song={song}
-          index={index}
-          isPlaying={playingId === song.id}
-          onPlay={() => setPlayingId(playingId === song.id ? null : song.id)}
-        />
-      ))}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {songs.map((song, index) => (
+          <SongRow
+            key={song.id}
+            song={song}
+            index={index}
+            isPlaying={playingId === song.id}
+            onPlay={() => setPlayingId(playingId === song.id ? null : song.id)}
+          />
+        ))}
+      </div>
     </div>
   )
 }
@@ -239,59 +481,130 @@ function SongRow({ song, index, isPlaying, onPlay }: { song: typeof mockLibraryS
 
   return (
     <div
-      className="grid grid-cols-12 gap-4 px-4 py-3 rounded-lg hover:bg-white/5 transition-all group"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '50px 2fr 1.5fr 1fr 80px 60px',
+        gap: '16px',
+        padding: '12px 20px',
+        borderRadius: '12px',
+        background: isHovered
+          ? 'linear-gradient(135deg, rgba(147, 51, 234, 0.08), rgba(219, 39, 119, 0.05))'
+          : isPlaying
+            ? 'rgba(147, 51, 234, 0.1)'
+            : 'transparent',
+        border: isPlaying ? '1px solid rgba(147, 51, 234, 0.2)' : '1px solid transparent',
+        transition: 'all 0.3s ease',
+        cursor: 'pointer',
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={onPlay}
     >
       {/* Index / Play Button */}
-      <div className="col-span-1 flex items-center">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {isHovered || isPlaying ? (
-          <button onClick={onPlay} className="hover:scale-110 transition-transform">
+          <button
+            onClick={(e) => { e.stopPropagation(); onPlay(); }}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             {isPlaying ? (
-              <Pause className="h-4 w-4 text-purple-400 fill-purple-400" />
+              <Pause style={{ width: '18px', height: '18px', color: '#a855f7', fill: '#a855f7' }} />
             ) : (
-              <Play className="h-4 w-4 text-white fill-white" />
+              <Play style={{ width: '18px', height: '18px', color: 'white', fill: 'white' }} />
             )}
           </button>
         ) : (
-          <span className="text-sm text-gray-400">{index + 1}</span>
+          <span style={{ fontSize: '14px', color: '#6b7280', fontWeight: '500' }}>{index + 1}</span>
         )}
       </div>
 
       {/* Title & Artist */}
-      <div className="col-span-5 flex items-center space-x-3">
-        <img src={song.coverUrl} alt={song.title} className="w-10 h-10 rounded" />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{
+          width: '48px',
+          height: '48px',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          boxShadow: isPlaying ? '0 4px 20px rgba(147, 51, 234, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.3)',
+          transition: 'box-shadow 0.3s ease',
+        }}>
+          <img src={song.coverUrl} alt={song.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
         <div>
-          <div className="text-sm font-medium text-white">{song.title}</div>
-          <div className="text-xs text-gray-400">{song.artist}</div>
+          <p style={{
+            fontSize: '15px',
+            fontWeight: '600',
+            color: isPlaying ? '#a855f7' : 'white',
+            margin: 0,
+            marginBottom: '4px',
+            transition: 'color 0.3s ease',
+          }}>{song.title}</p>
+          <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>{song.artistName}</p>
         </div>
       </div>
 
       {/* Album */}
-      <div className="col-span-2 flex items-center">
-        <span className="text-sm text-gray-400">{song.album}</span>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <span style={{ fontSize: '14px', color: '#9ca3af' }}>{song.album}</span>
       </div>
 
       {/* Date Added */}
-      <div className="col-span-2 flex items-center">
-        <span className="text-sm text-gray-400">{new Date(song.dateAdded).toLocaleDateString()}</span>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <span style={{ fontSize: '14px', color: '#6b7280' }}>{new Date(song.dateAdded).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
       </div>
 
       {/* Duration */}
-      <div className="col-span-1 flex items-center">
-        <span className="text-sm text-gray-400">{song.duration}</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+        <span style={{ fontSize: '14px', color: '#6b7280', fontFamily: 'monospace' }}>{song.duration}</span>
       </div>
 
       {/* Actions */}
-      <div className="col-span-1 flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        gap: '8px',
+        opacity: isHovered ? 1 : 0,
+        transition: 'opacity 0.3s ease',
+      }}>
         <button
-          onClick={() => setIsLiked(!isLiked)}
-          className="hover:scale-110 transition-transform"
+          onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '6px',
+            borderRadius: '6px',
+            transition: 'all 0.2s ease',
+          }}
         >
-          <Heart className={`h-4 w-4 ${isLiked ? 'fill-purple-500 text-purple-500' : 'text-gray-400'}`} />
+          <Heart style={{
+            width: '18px',
+            height: '18px',
+            color: isLiked ? '#ec4899' : '#6b7280',
+            fill: isLiked ? '#ec4899' : 'none',
+            transition: 'all 0.2s ease',
+          }} />
         </button>
-        <button className="hover:scale-110 transition-transform">
-          <MoreHorizontal className="h-4 w-4 text-gray-400" />
+        <button
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '6px',
+            borderRadius: '6px',
+          }}
+        >
+          <MoreHorizontal style={{ width: '18px', height: '18px', color: '#6b7280' }} />
         </button>
       </div>
     </div>
@@ -300,7 +613,11 @@ function SongRow({ song, index, isPlaying, onPlay }: { song: typeof mockLibraryS
 
 function GridView({ songs, playingId, setPlayingId }: { songs: typeof mockLibrarySongs; playingId: string | null; setPlayingId: (id: string | null) => void }) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+      gap: '24px',
+    }}>
       {songs.map((song) => (
         <AlbumCard
           key={song.id}
@@ -318,32 +635,118 @@ function AlbumCard({ song, isPlaying, onPlay }: { song: typeof mockLibrarySongs[
 
   return (
     <div
-      className="group cursor-pointer"
+      style={{
+        cursor: 'pointer',
+        transition: 'transform 0.3s ease',
+        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative aspect-square rounded-lg overflow-hidden mb-3 bg-white/5">
-        <img src={song.coverUrl} alt={song.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+      <div style={{
+        position: 'relative',
+        aspectRatio: '1',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        marginBottom: '14px',
+        boxShadow: isHovered
+          ? '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px rgba(147, 51, 234, 0.15)'
+          : '0 4px 20px rgba(0, 0, 0, 0.3)',
+        transition: 'box-shadow 0.3s ease',
+      }}>
+        <img
+          src={song.coverUrl}
+          alt={song.title}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            transition: 'transform 0.5s ease',
+            transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+          }}
+        />
 
         {/* Play Button Overlay */}
-        {isHovered && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <button
-              onClick={onPlay}
-              className="bg-purple-600 rounded-full p-4 hover:bg-purple-700 hover:scale-110 transition-all"
-            >
-              {isPlaying ? (
-                <Pause className="h-6 w-6 text-white fill-white" />
-              ) : (
-                <Play className="h-6 w-6 text-white fill-white ml-1" />
-              )}
-            </button>
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)',
+          opacity: isHovered ? 1 : 0,
+          transition: 'opacity 0.3s ease',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <button
+            onClick={onPlay}
+            style={{
+              width: '50px',
+              height: '50px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #9333ea, #db2777)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 24px rgba(147, 51, 234, 0.4)',
+              transform: isHovered ? 'scale(1)' : 'scale(0.8)',
+              transition: 'transform 0.3s ease',
+            }}
+          >
+            {isPlaying ? (
+              <Pause style={{ width: '22px', height: '22px', color: 'white', fill: 'white' }} />
+            ) : (
+              <Play style={{ width: '22px', height: '22px', color: 'white', fill: 'white', marginLeft: '2px' }} />
+            )}
+          </button>
+        </div>
+
+        {/* Playing Indicator */}
+        {isPlaying && (
+          <div style={{
+            position: 'absolute',
+            bottom: '12px',
+            left: '12px',
+            display: 'flex',
+            alignItems: 'flex-end',
+            gap: '3px',
+            height: '16px',
+          }}>
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className="animate-sound-wave"
+                style={{
+                  width: '3px',
+                  background: '#a855f7',
+                  borderRadius: '2px',
+                  animationDelay: `${i * 0.1}s`,
+                }}
+              />
+            ))}
           </div>
         )}
       </div>
 
-      <h3 className="text-sm font-medium text-white truncate">{song.title}</h3>
-      <p className="text-xs text-gray-400 truncate">{song.artist}</p>
+      <h3 style={{
+        fontSize: '15px',
+        fontWeight: '600',
+        color: isPlaying ? '#a855f7' : 'white',
+        margin: 0,
+        marginBottom: '6px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      }}>{song.title}</h3>
+      <p style={{
+        fontSize: '13px',
+        color: '#6b7280',
+        margin: 0,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      }}>{song.artistName}</p>
     </div>
   )
 }
