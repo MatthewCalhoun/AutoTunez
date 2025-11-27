@@ -39,8 +39,8 @@ export default function Navigation() {
           </div>
 
           {/* Connect Wallet Button - Far Right */}
-          <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2.5 rounded-full font-medium hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center space-x-2" style={{ marginLeft: 'auto' }}>
-            <Wallet className="h-4 w-4" />
+          <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-medium hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center space-x-2 text-lg" style={{ marginLeft: 'auto', padding: '0.75rem 1.875rem' }}>
+            <Wallet className="h-5 w-5" />
             <span>Connect Wallet</span>
           </button>
         </div>
