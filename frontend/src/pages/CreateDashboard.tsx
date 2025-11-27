@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Upload, Sparkles, Crown, Play, TrendingUp } from 'lucide-react'
+import { Upload, Sparkles, Crown, Play, TrendingUp, Music, DollarSign, Headphones, ChevronRight, Zap, BarChart3 } from 'lucide-react'
 
 const mockCreatorSongs = [
   {
@@ -11,6 +11,7 @@ const mockCreatorSongs = [
     earnings: 74.04,
     isExclusive: false,
     createdAt: '2025-01-15',
+    coverUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop',
   },
   {
     id: '2',
@@ -23,6 +24,7 @@ const mockCreatorSongs = [
     exclusivePrice: 100,
     soldExclusive: false,
     createdAt: '2025-01-18',
+    coverUrl: 'https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=300&h=300&fit=crop',
   },
   {
     id: '3',
@@ -33,210 +35,584 @@ const mockCreatorSongs = [
     earnings: 210.69,
     isExclusive: false,
     createdAt: '2025-01-20',
+    coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop',
   },
 ]
 
 export default function CreateDashboard() {
   const [showUploadModal, setShowUploadModal] = useState(false)
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null)
 
   const totalEarnings = mockCreatorSongs.reduce((sum, song) => sum + song.earnings, 0)
   const totalStreams = mockCreatorSongs.reduce((sum, song) => sum + song.totalStreams, 0)
 
   return (
-    <div className="h-screen bg-black text-white overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
-      {/* Hero Header with Gradient */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/30 via-pink-600/20 to-transparent" />
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-pink-600/20 rounded-full blur-3xl" />
-
-        <div className="relative px-8 py-6">
-          <div className="text-center mb-4">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2">
-              Creator Studio
-            </h1>
-            <p className="text-lg text-gray-400">
-              Create, publish, and earn from your AI-generated music
-            </p>
-          </div>
-
-          <div className="flex justify-center gap-20 mb-4">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-400">${totalEarnings.toFixed(2)}</div>
-              <div className="text-xs text-gray-400 mt-1">Total Earnings</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold">{totalStreams.toLocaleString()}</div>
-              <div className="text-xs text-gray-400 mt-1">Total Streams</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold">{mockCreatorSongs.length}</div>
-              <div className="text-xs text-gray-400 mt-1">Tracks</div>
-            </div>
-          </div>
-
-        </div>
+    <div style={{ minHeight: '100vh', background: '#000', color: 'white', position: 'relative', overflow: 'hidden' }}>
+      {/* Animated Background */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+        <div style={{
+          position: 'absolute',
+          top: '-10%',
+          right: '10%',
+          width: '600px',
+          height: '600px',
+          background: 'radial-gradient(circle, rgba(147, 51, 234, 0.2) 0%, transparent 70%)',
+          borderRadius: '50%',
+          filter: 'blur(80px)',
+        }} className="animate-pulse-slow" />
+        <div style={{
+          position: 'absolute',
+          bottom: '10%',
+          left: '5%',
+          width: '500px',
+          height: '500px',
+          background: 'radial-gradient(circle, rgba(219, 39, 119, 0.15) 0%, transparent 70%)',
+          borderRadius: '50%',
+          filter: 'blur(80px)',
+        }} className="animate-pulse-slow animation-delay-2000" />
+        <div style={{
+          position: 'absolute',
+          top: '40%',
+          left: '40%',
+          width: '400px',
+          height: '400px',
+          background: 'radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%)',
+          borderRadius: '50%',
+          filter: 'blur(80px)',
+        }} className="animate-pulse-slow animation-delay-4000" />
       </div>
 
-      {/* ========== MAIN CONTENT AREA ========== */}
-      <div className="w-full px-8 lg:px-16 xl:px-24 py-4">
+      <div style={{ position: 'relative', zIndex: 1, padding: '40px' }}>
+        {/* Hero Header */}
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 16px',
+            borderRadius: '100px',
+            background: 'rgba(147, 51, 234, 0.15)',
+            border: '1px solid rgba(147, 51, 234, 0.3)',
+            marginBottom: '20px',
+          }}>
+            <Sparkles style={{ width: '16px', height: '16px', color: '#a855f7' }} />
+            <span style={{ fontSize: '13px', color: '#c4b5fd', fontWeight: '500' }}>AI-Powered Creator Tools</span>
+          </div>
 
-        {/* QUICK ACTIONS - 3 cards centered and spread */}
-        <div className="w-full flex justify-center mb-6" style={{ marginTop: '4rem' }}>
-          <div className="w-full flex flex-col md:flex-row justify-center items-center gap-12">
+          <h1 style={{
+            fontSize: '52px',
+            fontWeight: '800',
+            margin: '0 0 12px 0',
+            background: 'linear-gradient(135deg, #ffffff 0%, #a855f7 50%, #ec4899 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}>
+            Creator Studio
+          </h1>
+          <p style={{ fontSize: '18px', color: '#9ca3af', margin: 0 }}>
+            Create, publish, and earn from your AI-generated music
+          </p>
+        </div>
 
+        {/* Stats Row */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '24px',
+          marginBottom: '48px',
+          flexWrap: 'wrap',
+        }}>
+          <StatCard
+            icon={<DollarSign style={{ width: '24px', height: '24px' }} />}
+            value={`$${totalEarnings.toFixed(2)}`}
+            label="Total Earnings"
+            gradient="from-green-500 to-emerald-500"
+            valueColor="#4ade80"
+          />
+          <StatCard
+            icon={<Headphones style={{ width: '24px', height: '24px' }} />}
+            value={totalStreams.toLocaleString()}
+            label="Total Streams"
+            gradient="from-purple-500 to-pink-500"
+            valueColor="#e879f9"
+          />
+          <StatCard
+            icon={<Music style={{ width: '24px', height: '24px' }} />}
+            value={mockCreatorSongs.length.toString()}
+            label="Published Tracks"
+            gradient="from-cyan-500 to-blue-500"
+            valueColor="#22d3ee"
+          />
+        </div>
+
+        {/* Quick Actions */}
+        <div style={{ marginBottom: '64px' }}>
+          <h2 style={{
+            fontSize: '14px',
+            fontWeight: '600',
+            color: '#6b7280',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            marginBottom: '20px',
+            textAlign: 'center',
+          }}>Quick Actions</h2>
+
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '24px',
+            flexWrap: 'wrap',
+          }}>
             {/* Generate with AI */}
-            <div
+            <ActionCard
+              icon={<Sparkles style={{ width: '28px', height: '28px' }} />}
+              title="Generate with AI"
+              subtitle="$0.20 per track"
+              gradient="linear-gradient(135deg, #9333ea, #db2777)"
+              isHovered={hoveredCard === 'generate'}
+              onHover={() => setHoveredCard('generate')}
+              onLeave={() => setHoveredCard(null)}
               onClick={() => setShowUploadModal(true)}
-              className="w-full md:w-72 lg:w-80 p-6 rounded-2xl bg-gradient-to-br from-purple-600/20 to-pink-600/20 border border-purple-500/30 cursor-pointer hover:border-purple-500/60 hover:scale-[1.02] transition-all group"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-lg shadow-purple-500/30">
-                  <Sparkles className="h-7 w-7 text-white" />
-                </div>
-                <div className="font-bold text-lg mb-1">Generate with AI</div>
-                <div className="text-gray-400 text-sm">$0.20 per track</div>
-              </div>
-            </div>
+              isPrimary
+            />
 
             {/* Upload Track */}
-            <div className="w-full md:w-72 lg:w-80 p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 hover:scale-[1.02] transition-all cursor-pointer group">
-              <div className="flex flex-col items-center text-center">
-                <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center mb-3 group-hover:bg-white/20 transition-colors">
-                  <Upload className="h-7 w-7 text-gray-400" />
-                </div>
-                <div className="font-bold text-lg mb-1">Upload Track</div>
-                <div className="text-gray-400 text-sm">Your own music</div>
-              </div>
-            </div>
+            <ActionCard
+              icon={<Upload style={{ width: '28px', height: '28px' }} />}
+              title="Upload Track"
+              subtitle="Your own music"
+              isHovered={hoveredCard === 'upload'}
+              onHover={() => setHoveredCard('upload')}
+              onLeave={() => setHoveredCard(null)}
+              onClick={() => {}}
+            />
 
             {/* Analytics */}
-            <div className="w-full md:w-72 lg:w-80 p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 hover:scale-[1.02] transition-all cursor-pointer group">
-              <div className="flex flex-col items-center text-center">
-                <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center mb-3 group-hover:bg-white/20 transition-colors">
-                  <TrendingUp className="h-7 w-7 text-gray-400" />
-                </div>
-                <div className="font-bold text-lg mb-1">Analytics</div>
-                <div className="text-gray-400 text-sm">View insights</div>
-              </div>
-            </div>
+            <ActionCard
+              icon={<BarChart3 style={{ width: '28px', height: '28px' }} />}
+              title="Analytics"
+              subtitle="View insights"
+              isHovered={hoveredCard === 'analytics'}
+              onHover={() => setHoveredCard('analytics')}
+              onLeave={() => setHoveredCard(null)}
+              onClick={() => {}}
+            />
           </div>
         </div>
 
-        {/* MAIN SECTION - Tracks & Sidebar spread across full width */}
-        <div className="w-full flex flex-col xl:flex-row justify-center gap-12" style={{ marginTop: '8rem' }}>
-
-          {/* YOUR TRACKS - Left/Main section */}
-          <div className="w-full xl:flex-1 xl:max-w-4xl bg-white/5 rounded-3xl border border-white/10 overflow-hidden">
-            <div className="p-4 border-b border-white/10 text-center">
-              <h2 className="text-xl font-bold">Your Tracks</h2>
+        {/* Main Content Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 340px',
+          gap: '32px',
+          maxWidth: '1400px',
+          margin: '0 auto',
+        }}>
+          {/* Your Tracks */}
+          <div style={{
+            background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))',
+            borderRadius: '24px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              padding: '24px 28px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #9333ea, #db2777)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <Music style={{ width: '20px', height: '20px', color: 'white' }} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '20px', fontWeight: '700', margin: 0, color: 'white' }}>Your Tracks</h2>
+                  <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>{mockCreatorSongs.length} published</p>
+                </div>
+              </div>
+              <button style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '10px 16px',
+                borderRadius: '10px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#9ca3af',
+                fontSize: '13px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+              }} className="hover:bg-white/10">
+                View All
+                <ChevronRight style={{ width: '16px', height: '16px' }} />
+              </button>
             </div>
 
-            <div className="divide-y divide-white/10">
+            <div>
               {mockCreatorSongs.map((song, index) => (
-                <div
-                  key={song.id}
-                  className="p-4 hover:bg-white/5 transition-colors"
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    {/* Left side - number, play, info */}
-                    <div className="flex items-center gap-4">
-                      <div className="w-6 text-center text-gray-500 font-bold">
-                        {index + 1}
-                      </div>
-
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center flex-shrink-0 cursor-pointer hover:scale-105 transition-transform">
-                        <Play className="h-4 w-4 text-white ml-0.5" />
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <h3 className="font-bold">{song.title}</h3>
-                          {song.isExclusive && (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
-                              <Crown className="h-2.5 w-2.5" />
-                              Exclusive
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-gray-400 text-sm">
-                          {song.genre} • ${song.streamPrice}/stream
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Right side - stats */}
-                    <div className="hidden md:flex items-center gap-16">
-                      <div className="text-center">
-                        <div className="font-bold text-lg">{song.totalStreams.toLocaleString()}</div>
-                        <div className="text-xs text-gray-500">streams</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-bold text-lg text-green-400">${song.earnings.toFixed(2)}</div>
-                        <div className="text-xs text-gray-500">earned</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <TrackRow key={song.id} song={song} index={index} />
               ))}
             </div>
           </div>
 
-          {/* RIGHT SIDEBAR */}
-          <div className="w-full xl:w-80 flex flex-col gap-6">
-
+          {/* Sidebar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {/* Available Balance */}
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-green-600/15 to-emerald-600/15 border border-green-500/30 text-center">
-              <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-2 font-medium">Available Balance</h3>
-              <div className="text-3xl font-bold text-green-400 mb-4">
-                ${totalEarnings.toFixed(2)}
+            <div style={{
+              padding: '28px',
+              borderRadius: '24px',
+              background: 'linear-gradient(145deg, rgba(34, 197, 94, 0.12), rgba(16, 185, 129, 0.08))',
+              border: '1px solid rgba(34, 197, 94, 0.25)',
+              position: 'relative',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '-20px',
+                right: '-20px',
+                width: '100px',
+                height: '100px',
+                background: 'rgba(34, 197, 94, 0.15)',
+                borderRadius: '50%',
+                filter: 'blur(30px)',
+              }} />
+              <div style={{ position: 'relative' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                  <DollarSign style={{ width: '18px', height: '18px', color: '#4ade80' }} />
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: '#86efac', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    Available Balance
+                  </span>
+                </div>
+                <div style={{
+                  fontSize: '42px',
+                  fontWeight: '800',
+                  color: '#4ade80',
+                  marginBottom: '20px',
+                  lineHeight: 1,
+                }}>
+                  ${totalEarnings.toFixed(2)}
+                </div>
+                <button style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '14px',
+                  background: 'linear-gradient(135deg, #22c55e, #10b981)',
+                  border: 'none',
+                  color: 'black',
+                  fontSize: '15px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 8px 24px rgba(34, 197, 94, 0.3)',
+                }}>
+                  Withdraw Funds
+                </button>
               </div>
-              <button className="w-full bg-green-500 text-black py-2.5 rounded-full font-bold hover:bg-green-400 transition-colors">
-                Withdraw
-              </button>
             </div>
 
             {/* Top Performing */}
-            <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
-              <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-3 font-medium text-center">Top Performing</h3>
-              <div className="flex flex-col items-center text-center">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center mb-2">
-                  <Play className="h-4 w-4 text-white ml-0.5" />
+            <div style={{
+              padding: '24px',
+              borderRadius: '24px',
+              background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+                <Zap style={{ width: '18px', height: '18px', color: '#fbbf24' }} />
+                <span style={{ fontSize: '12px', fontWeight: '600', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  Top Performing
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
+                <div style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
+                }}>
+                  <img
+                    src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop"
+                    alt="Neon Nights"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
                 </div>
-                <div className="font-bold">Neon Nights</div>
-                <div className="text-gray-400 text-sm mb-2">2,341 streams</div>
-                <div className="w-full pt-2 border-t border-white/10 flex justify-between items-center">
-                  <span className="text-gray-400 text-sm">Growth</span>
-                  <span className="text-green-400 font-bold">+127%</span>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'white', margin: '0 0 4px 0' }}>Neon Nights</h3>
+                  <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>2,341 streams</p>
                 </div>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px',
+                borderRadius: '12px',
+                background: 'rgba(255, 255, 255, 0.03)',
+              }}>
+                <span style={{ fontSize: '13px', color: '#9ca3af' }}>Weekly Growth</span>
+                <span style={{
+                  fontSize: '15px',
+                  fontWeight: '700',
+                  color: '#4ade80',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}>
+                  <TrendingUp style={{ width: '16px', height: '16px' }} />
+                  +127%
+                </span>
               </div>
             </div>
 
             {/* This Month Stats */}
-            <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
-              <h3 className="text-xs text-gray-400 uppercase tracking-wider mb-3 font-medium text-center">This Month</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400 text-sm">New Streams</span>
-                  <span className="font-bold">+1,247</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400 text-sm">Revenue</span>
-                  <span className="font-bold text-green-400">+$89.40</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400 text-sm">New Followers</span>
-                  <span className="font-bold">+23</span>
-                </div>
+            <div style={{
+              padding: '24px',
+              borderRadius: '24px',
+              background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+                <BarChart3 style={{ width: '18px', height: '18px', color: '#a855f7' }} />
+                <span style={{ fontSize: '12px', fontWeight: '600', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  This Month
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <MonthStatRow label="New Streams" value="+1,247" />
+                <MonthStatRow label="Revenue" value="+$89.40" isGreen />
+                <MonthStatRow label="New Followers" value="+23" />
               </div>
             </div>
-
           </div>
         </div>
       </div>
 
       {/* Upload Modal */}
       {showUploadModal && <UploadModal onClose={() => setShowUploadModal(false)} />}
+    </div>
+  )
+}
+
+function StatCard({ icon, value, label, gradient, valueColor }: {
+  icon: React.ReactNode
+  value: string
+  label: string
+  gradient: string
+  valueColor: string
+}) {
+  return (
+    <div style={{
+      padding: '24px 32px',
+      borderRadius: '20px',
+      background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))',
+      border: '1px solid rgba(255, 255, 255, 0.08)',
+      minWidth: '200px',
+      textAlign: 'center',
+    }}>
+      <div
+        className={`bg-gradient-to-r ${gradient}`}
+        style={{
+          width: '48px',
+          height: '48px',
+          borderRadius: '14px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto 16px',
+          color: 'white',
+        }}
+      >
+        {icon}
+      </div>
+      <div style={{ fontSize: '32px', fontWeight: '800', color: valueColor, marginBottom: '4px' }}>
+        {value}
+      </div>
+      <div style={{ fontSize: '13px', color: '#6b7280', fontWeight: '500' }}>
+        {label}
+      </div>
+    </div>
+  )
+}
+
+function ActionCard({ icon, title, subtitle, gradient, isHovered, onHover, onLeave, onClick, isPrimary }: {
+  icon: React.ReactNode
+  title: string
+  subtitle: string
+  gradient?: string
+  isHovered: boolean
+  onHover: () => void
+  onLeave: () => void
+  onClick: () => void
+  isPrimary?: boolean
+}) {
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
+      style={{
+        width: '240px',
+        padding: '32px 24px',
+        borderRadius: '24px',
+        background: isPrimary
+          ? 'linear-gradient(145deg, rgba(147, 51, 234, 0.15), rgba(219, 39, 119, 0.1))'
+          : 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))',
+        border: isPrimary
+          ? '1px solid rgba(147, 51, 234, 0.3)'
+          : '1px solid rgba(255, 255, 255, 0.08)',
+        cursor: 'pointer',
+        transition: 'all 0.4s ease',
+        transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
+        boxShadow: isHovered
+          ? isPrimary
+            ? '0 20px 40px rgba(147, 51, 234, 0.25)'
+            : '0 20px 40px rgba(0, 0, 0, 0.3)'
+          : 'none',
+        textAlign: 'center',
+      }}
+    >
+      <div style={{
+        width: '64px',
+        height: '64px',
+        borderRadius: '20px',
+        background: isPrimary ? gradient : 'rgba(255, 255, 255, 0.08)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '0 auto 20px',
+        color: isPrimary ? 'white' : '#9ca3af',
+        transition: 'all 0.3s ease',
+        transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+        boxShadow: isPrimary ? '0 8px 24px rgba(147, 51, 234, 0.4)' : 'none',
+      }}>
+        {icon}
+      </div>
+      <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'white', margin: '0 0 6px 0' }}>
+        {title}
+      </h3>
+      <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
+        {subtitle}
+      </p>
+    </div>
+  )
+}
+
+function TrackRow({ song, index }: { song: typeof mockCreatorSongs[0]; index: number }) {
+  const [isHovered, setIsHovered] = useState(false)
+
+  return (
+    <div
+      style={{
+        padding: '16px 28px',
+        borderBottom: index < mockCreatorSongs.length - 1 ? '1px solid rgba(255, 255, 255, 0.06)' : 'none',
+        background: isHovered ? 'rgba(147, 51, 234, 0.05)' : 'transparent',
+        transition: 'background 0.3s ease',
+        cursor: 'pointer',
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Left side */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ width: '24px', fontSize: '14px', color: '#6b7280', fontWeight: '500', textAlign: 'center' }}>
+            {index + 1}
+          </span>
+
+          <div style={{
+            width: '52px',
+            height: '52px',
+            borderRadius: '12px',
+            overflow: 'hidden',
+            position: 'relative',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          }}>
+            <img src={song.coverUrl} alt={song.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: isHovered ? 1 : 0,
+              transition: 'opacity 0.3s ease',
+            }}>
+              <Play style={{ width: '20px', height: '20px', color: 'white', fill: 'white' }} />
+            </div>
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: '600', color: 'white', margin: 0 }}>{song.title}</h3>
+              {song.isExclusive && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(234, 88, 12, 0.1))',
+                  border: '1px solid rgba(245, 158, 11, 0.3)',
+                  fontSize: '10px',
+                  fontWeight: '700',
+                  color: '#fbbf24',
+                  textTransform: 'uppercase',
+                }}>
+                  <Crown style={{ width: '10px', height: '10px' }} />
+                  Exclusive
+                </span>
+              )}
+            </div>
+            <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>
+              {song.genre} • ${song.streamPrice}/stream
+            </p>
+          </div>
+        </div>
+
+        {/* Right side - Stats */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '17px', fontWeight: '700', color: 'white' }}>{song.totalStreams.toLocaleString()}</div>
+            <div style={{ fontSize: '11px', color: '#6b7280' }}>streams</div>
+          </div>
+          <div style={{ textAlign: 'right', minWidth: '80px' }}>
+            <div style={{ fontSize: '17px', fontWeight: '700', color: '#4ade80' }}>${song.earnings.toFixed(2)}</div>
+            <div style={{ fontSize: '11px', color: '#6b7280' }}>earned</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MonthStatRow({ label, value, isGreen }: { label: string; value: string; isGreen?: boolean }) {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '12px 14px',
+      borderRadius: '10px',
+      background: 'rgba(255, 255, 255, 0.03)',
+    }}>
+      <span style={{ fontSize: '13px', color: '#9ca3af' }}>{label}</span>
+      <span style={{ fontSize: '15px', fontWeight: '700', color: isGreen ? '#4ade80' : 'white' }}>{value}</span>
     </div>
   )
 }
@@ -251,62 +627,158 @@ function UploadModal({ onClose }: { onClose: () => void }) {
   const [exclusivePrice, setExclusivePrice] = useState('100')
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-zinc-900 border border-white/10 rounded-3xl p-8 max-w-lg w-full shadow-2xl">
-        <div className="flex items-center justify-center gap-2 mb-8">
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      zIndex: 50,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '16px',
+      background: 'rgba(0, 0, 0, 0.85)',
+      backdropFilter: 'blur(12px)',
+    }}>
+      <div style={{
+        background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.98), rgba(20, 20, 25, 0.99))',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        borderRadius: '32px',
+        padding: '40px',
+        maxWidth: '480px',
+        width: '100%',
+        boxShadow: '0 40px 80px rgba(0, 0, 0, 0.5), 0 0 100px rgba(147, 51, 234, 0.1)',
+      }}>
+        {/* Progress Steps */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '40px' }}>
           {[1, 2, 3].map((num) => {
             const stepIndex = ['generate', 'details', 'pricing'].indexOf(step)
             const isActive = num - 1 === stepIndex
             const isComplete = num - 1 < stepIndex
             return (
-              <div key={num} className="flex items-center gap-2">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                  isActive
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white scale-110'
+              <div key={num} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '15px',
+                  fontWeight: '700',
+                  transition: 'all 0.3s ease',
+                  background: isActive
+                    ? 'linear-gradient(135deg, #9333ea, #db2777)'
                     : isComplete
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-white/10 text-gray-500'
-                }`}>
+                      ? '#9333ea'
+                      : 'rgba(255, 255, 255, 0.08)',
+                  color: isActive || isComplete ? 'white' : '#6b7280',
+                  transform: isActive ? 'scale(1.15)' : 'scale(1)',
+                  boxShadow: isActive ? '0 8px 24px rgba(147, 51, 234, 0.4)' : 'none',
+                }}>
                   {num}
                 </div>
-                {num < 3 && <div className={`w-8 h-0.5 ${isComplete ? 'bg-purple-600' : 'bg-white/10'}`} />}
+                {num < 3 && (
+                  <div style={{
+                    width: '40px',
+                    height: '3px',
+                    borderRadius: '2px',
+                    background: isComplete ? 'linear-gradient(90deg, #9333ea, #db2777)' : 'rgba(255, 255, 255, 0.1)',
+                  }} />
+                )}
               </div>
             )
           })}
         </div>
 
         {step === 'generate' && (
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center mx-auto mb-6">
-              <Sparkles className="h-8 w-8 text-white" />
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '24px',
+              background: 'linear-gradient(135deg, #9333ea, #db2777)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px',
+              boxShadow: '0 12px 32px rgba(147, 51, 234, 0.4)',
+            }}>
+              <Sparkles style={{ width: '36px', height: '36px', color: 'white' }} />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Describe Your Track</h2>
-            <p className="text-gray-400 mb-6">What kind of music do you want to create?</p>
+            <h2 style={{ fontSize: '28px', fontWeight: '800', color: 'white', margin: '0 0 8px 0' }}>Describe Your Track</h2>
+            <p style={{ fontSize: '15px', color: '#9ca3af', margin: '0 0 28px 0' }}>What kind of music do you want to create?</p>
 
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="e.g., Chill lofi beats with warm piano and soft drums..."
-              className="w-full px-4 py-4 rounded-2xl bg-white/5 border border-white/10 focus:border-purple-500 focus:outline-none text-white placeholder-gray-500 resize-none mb-4 text-center"
+              style={{
+                width: '100%',
+                padding: '20px',
+                borderRadius: '16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: 'white',
+                fontSize: '15px',
+                resize: 'none',
+                outline: 'none',
+                marginBottom: '20px',
+                textAlign: 'center',
+                lineHeight: 1.6,
+              }}
               rows={3}
+              className="placeholder-gray-500 focus:border-purple-500"
             />
 
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 text-gray-400 text-sm mb-6">
-              <Sparkles className="h-4 w-4" />
-              Generation cost: <span className="text-white font-semibold">$0.20</span>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 20px',
+              borderRadius: '100px',
+              background: 'rgba(147, 51, 234, 0.1)',
+              border: '1px solid rgba(147, 51, 234, 0.2)',
+              marginBottom: '28px',
+            }}>
+              <Sparkles style={{ width: '16px', height: '16px', color: '#a855f7' }} />
+              <span style={{ fontSize: '14px', color: '#9ca3af' }}>Generation cost:</span>
+              <span style={{ fontSize: '14px', color: 'white', fontWeight: '700' }}>$0.20</span>
             </div>
 
-            <div className="flex gap-3">
+            <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={onClose}
-                className="flex-1 px-6 py-4 border border-white/20 text-white rounded-full font-semibold hover:bg-white/5 transition-colors"
+                style={{
+                  flex: 1,
+                  padding: '16px',
+                  borderRadius: '14px',
+                  background: 'transparent',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
               >
                 Cancel
               </button>
               <button
                 onClick={() => setStep('details')}
                 disabled={!prompt}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-full font-semibold hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{
+                  flex: 1,
+                  padding: '16px',
+                  borderRadius: '14px',
+                  background: 'linear-gradient(135deg, #9333ea, #db2777)',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: '700',
+                  cursor: prompt ? 'pointer' : 'not-allowed',
+                  opacity: prompt ? 1 : 0.4,
+                  transition: 'all 0.3s ease',
+                  boxShadow: prompt ? '0 8px 24px rgba(147, 51, 234, 0.3)' : 'none',
+                }}
               >
                 Generate
               </button>
@@ -316,43 +788,84 @@ function UploadModal({ onClose }: { onClose: () => void }) {
 
         {step === 'details' && (
           <div>
-            <h2 className="text-2xl font-bold text-white mb-1 text-center">Track Details</h2>
-            <p className="text-gray-400 mb-6 text-center">Name your creation</p>
+            <h2 style={{ fontSize: '28px', fontWeight: '800', color: 'white', margin: '0 0 8px 0', textAlign: 'center' }}>Track Details</h2>
+            <p style={{ fontSize: '15px', color: '#9ca3af', margin: '0 0 28px 0', textAlign: 'center' }}>Name your creation</p>
 
-            <div className="space-y-4 mb-6">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '28px' }}>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Track title"
-                className="w-full px-4 py-4 rounded-2xl bg-white/5 border border-white/10 focus:border-purple-500 focus:outline-none text-white placeholder-gray-500"
+                style={{
+                  width: '100%',
+                  padding: '18px 20px',
+                  borderRadius: '14px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: 'white',
+                  fontSize: '15px',
+                  outline: 'none',
+                }}
+                className="placeholder-gray-500 focus:border-purple-500"
               />
               <select
                 value={genre}
                 onChange={(e) => setGenre(e.target.value)}
-                className="w-full px-4 py-4 rounded-2xl bg-white/5 border border-white/10 focus:border-purple-500 focus:outline-none text-white"
+                style={{
+                  width: '100%',
+                  padding: '18px 20px',
+                  borderRadius: '14px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: genre ? 'white' : '#6b7280',
+                  fontSize: '15px',
+                  outline: 'none',
+                  cursor: 'pointer',
+                }}
               >
-                <option value="" className="bg-zinc-900">Select genre</option>
-                <option value="lofi" className="bg-zinc-900">Lofi</option>
-                <option value="trap" className="bg-zinc-900">Trap</option>
-                <option value="house" className="bg-zinc-900">House</option>
-                <option value="ambient" className="bg-zinc-900">Ambient</option>
-                <option value="jazz" className="bg-zinc-900">Jazz</option>
-                <option value="synthwave" className="bg-zinc-900">Synthwave</option>
+                <option value="" style={{ background: '#1a1a1f' }}>Select genre</option>
+                <option value="lofi" style={{ background: '#1a1a1f' }}>Lofi</option>
+                <option value="trap" style={{ background: '#1a1a1f' }}>Trap</option>
+                <option value="house" style={{ background: '#1a1a1f' }}>House</option>
+                <option value="ambient" style={{ background: '#1a1a1f' }}>Ambient</option>
+                <option value="jazz" style={{ background: '#1a1a1f' }}>Jazz</option>
+                <option value="synthwave" style={{ background: '#1a1a1f' }}>Synthwave</option>
               </select>
             </div>
 
-            <div className="flex gap-3">
+            <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={() => setStep('generate')}
-                className="flex-1 px-6 py-4 border border-white/20 text-white rounded-full font-semibold hover:bg-white/5 transition-colors"
+                style={{
+                  flex: 1,
+                  padding: '16px',
+                  borderRadius: '14px',
+                  background: 'transparent',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                }}
               >
                 Back
               </button>
               <button
                 onClick={() => setStep('pricing')}
                 disabled={!title || !genre}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-full font-semibold hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{
+                  flex: 1,
+                  padding: '16px',
+                  borderRadius: '14px',
+                  background: 'linear-gradient(135deg, #9333ea, #db2777)',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: '700',
+                  cursor: title && genre ? 'pointer' : 'not-allowed',
+                  opacity: title && genre ? 1 : 0.4,
+                }}
               >
                 Continue
               </button>
@@ -362,70 +875,151 @@ function UploadModal({ onClose }: { onClose: () => void }) {
 
         {step === 'pricing' && (
           <div>
-            <h2 className="text-2xl font-bold text-white mb-1 text-center">Set Pricing</h2>
-            <p className="text-gray-400 mb-6 text-center">How much per stream?</p>
+            <h2 style={{ fontSize: '28px', fontWeight: '800', color: 'white', margin: '0 0 8px 0', textAlign: 'center' }}>Set Pricing</h2>
+            <p style={{ fontSize: '15px', color: '#9ca3af', margin: '0 0 28px 0', textAlign: 'center' }}>How much per stream?</p>
 
-            <div className="space-y-4 mb-6">
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '28px' }}>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280', fontSize: '18px' }}>$</span>
                 <input
                   type="number"
                   value={streamPrice}
                   onChange={(e) => setStreamPrice(e.target.value)}
                   step="0.01"
                   min="0.01"
-                  className="w-full pl-8 pr-4 py-4 rounded-2xl bg-white/5 border border-white/10 focus:border-purple-500 focus:outline-none text-white text-lg"
+                  style={{
+                    width: '100%',
+                    padding: '18px 20px 18px 40px',
+                    borderRadius: '14px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: 'white',
+                    fontSize: '18px',
+                    outline: 'none',
+                  }}
                 />
               </div>
 
               <div
                 onClick={() => setOfferExclusive(!offerExclusive)}
-                className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                  offerExclusive ? 'bg-amber-500/10 border-amber-500/30' : 'bg-white/5 border-white/10'
-                }`}
+                style={{
+                  padding: '20px',
+                  borderRadius: '16px',
+                  background: offerExclusive ? 'rgba(245, 158, 11, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                  border: offerExclusive ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
               >
-                <div className="flex items-center gap-3">
-                  <Crown className={`h-5 w-5 ${offerExclusive ? 'text-amber-400' : 'text-gray-400'}`} />
-                  <div className="flex-1">
-                    <div className="font-semibold text-white">Exclusive Rights</div>
-                    <div className="text-sm text-gray-400">Allow purchase of full ownership</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <Crown style={{ width: '22px', height: '22px', color: offerExclusive ? '#fbbf24' : '#6b7280' }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '16px', fontWeight: '600', color: 'white' }}>Exclusive Rights</div>
+                    <div style={{ fontSize: '13px', color: '#6b7280' }}>Allow purchase of full ownership</div>
                   </div>
-                  <div className={`w-12 h-7 rounded-full p-1 transition-colors ${offerExclusive ? 'bg-amber-500' : 'bg-white/20'}`}>
-                    <div className={`w-5 h-5 rounded-full bg-white transition-transform ${offerExclusive ? 'translate-x-5' : ''}`} />
+                  <div style={{
+                    width: '48px',
+                    height: '28px',
+                    borderRadius: '14px',
+                    padding: '3px',
+                    background: offerExclusive ? '#fbbf24' : 'rgba(255, 255, 255, 0.2)',
+                    transition: 'all 0.3s ease',
+                  }}>
+                    <div style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '50%',
+                      background: 'white',
+                      transform: offerExclusive ? 'translateX(20px)' : 'translateX(0)',
+                      transition: 'transform 0.3s ease',
+                    }} />
                   </div>
                 </div>
                 {offerExclusive && (
-                  <div className="relative mt-4">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                  <div style={{ position: 'relative', marginTop: '16px' }}>
+                    <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }}>$</span>
                     <input
                       type="number"
                       value={exclusivePrice}
                       onChange={(e) => setExclusivePrice(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
-                      className="w-full pl-8 pr-4 py-3 rounded-xl bg-black/30 border border-amber-500/30 text-white"
+                      style={{
+                        width: '100%',
+                        padding: '14px 16px 14px 36px',
+                        borderRadius: '12px',
+                        background: 'rgba(0, 0, 0, 0.3)',
+                        border: '1px solid rgba(245, 158, 11, 0.3)',
+                        color: 'white',
+                        fontSize: '16px',
+                        outline: 'none',
+                      }}
                     />
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 text-sm">
-                <span className="text-gray-400">You earn</span>
-                <span className="text-white font-bold text-lg">60%</span>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '16px 20px',
+                borderRadius: '14px',
+                background: 'rgba(255, 255, 255, 0.05)',
+              }}>
+                <span style={{ fontSize: '14px', color: '#9ca3af' }}>Platform fee</span>
+                <span style={{ fontSize: '14px', color: '#6b7280' }}>40%</span>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '16px 20px',
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.05))',
+                border: '1px solid rgba(34, 197, 94, 0.2)',
+              }}>
+                <span style={{ fontSize: '14px', color: '#4ade80' }}>You earn</span>
+                <span style={{ fontSize: '18px', fontWeight: '700', color: '#4ade80' }}>60%</span>
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={() => setStep('details')}
-                className="flex-1 px-6 py-4 border border-white/20 text-white rounded-full font-semibold hover:bg-white/5 transition-colors"
+                style={{
+                  flex: 1,
+                  padding: '16px',
+                  borderRadius: '14px',
+                  background: 'transparent',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                }}
               >
                 Back
               </button>
               <button
                 onClick={onClose}
-                className="flex-1 bg-white text-black py-4 rounded-full font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+                style={{
+                  flex: 1,
+                  padding: '16px',
+                  borderRadius: '14px',
+                  background: 'white',
+                  border: 'none',
+                  color: 'black',
+                  fontSize: '15px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                }}
               >
-                <Upload className="h-5 w-5" />
+                <Upload style={{ width: '18px', height: '18px' }} />
                 Publish
               </button>
             </div>
