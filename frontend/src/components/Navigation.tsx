@@ -1,10 +1,14 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Music2, Compass, Plus, User, Wallet } from 'lucide-react'
+import { Music2, Compass, Plus, User, Wallet, LogOut, Loader2 } from 'lucide-react'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { useWallet } from '../contexts/WalletContext'
 
 export default function Navigation() {
   const location = useLocation()
   const isMobile = useIsMobile()
+  const { identityKey, isConnecting, isConnected, connect, disconnect } = useWallet()
+
+  const truncatedKey = identityKey ? `${identityKey.slice(0, 6)}...${identityKey.slice(-4)}` : ''
 
   const isActive = (path: string) => location.pathname === path
 
@@ -42,11 +46,46 @@ export default function Navigation() {
               </NavLink>
             </div>
 
-            {/* Connect Wallet Button - Far Right */}
-            <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-medium hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center space-x-2 text-lg" style={{ marginLeft: 'auto', padding: '0.75rem 1.875rem' }}>
-              <Wallet className="h-5 w-5" />
-              <span>Connect Wallet</span>
-            </button>
+            {/* Wallet Button - Far Right */}
+            {isConnected ? (
+              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{
+                  fontFamily: 'monospace',
+                  fontSize: '14px',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                }}>{truncatedKey}</span>
+                <button
+                  onClick={disconnect}
+                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-full font-medium transition-all duration-200 flex items-center space-x-2"
+                  style={{ padding: '0.75rem 1.25rem' }}
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>Disconnect</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={connect}
+                disabled={isConnecting}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-medium hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center space-x-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ marginLeft: 'auto', padding: '0.75rem 1.875rem' }}
+              >
+                {isConnecting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>Connecting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Wallet className="h-5 w-5" />
+                    <span>Connect Wallet</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </nav>
@@ -89,20 +128,52 @@ export default function Navigation() {
             }}>Autotune</span>
           </Link>
 
-          {/* Compact Connect Button */}
-          <button style={{
-            background: 'linear-gradient(135deg, #9333ea, #db2777)',
-            border: 'none',
-            borderRadius: '12px',
-            padding: '10px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            cursor: 'pointer',
-          }}>
-            <Wallet style={{ width: '16px', height: '16px', color: 'white' }} />
-            <span style={{ color: 'white', fontSize: '14px', fontWeight: '600' }}>Connect</span>
-          </button>
+          {/* Compact Wallet Button */}
+          {isConnected ? (
+            <button
+              onClick={disconnect}
+              style={{
+                background: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '12px',
+                padding: '10px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '12px', fontFamily: 'monospace' }}>{truncatedKey}</span>
+            </button>
+          ) : (
+            <button
+              onClick={connect}
+              disabled={isConnecting}
+              style={{
+                background: isConnecting ? 'rgba(147, 51, 234, 0.5)' : 'linear-gradient(135deg, #9333ea, #db2777)',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '10px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: isConnecting ? 'not-allowed' : 'pointer',
+                opacity: isConnecting ? 0.7 : 1,
+              }}
+            >
+              {isConnecting ? (
+                <>
+                  <Loader2 style={{ width: '16px', height: '16px', color: 'white', animation: 'spin 1s linear infinite' }} />
+                  <span style={{ color: 'white', fontSize: '14px', fontWeight: '600' }}>...</span>
+                </>
+              ) : (
+                <>
+                  <Wallet style={{ width: '16px', height: '16px', color: 'white' }} />
+                  <span style={{ color: 'white', fontSize: '14px', fontWeight: '600' }}>Connect</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </nav>
 

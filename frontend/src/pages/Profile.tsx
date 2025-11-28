@@ -1,17 +1,17 @@
 import { useState } from 'react'
-import { Wallet, Copy, Check, ExternalLink, Music, DollarSign, Heart, LogOut, TrendingUp, Play, Clock, Settings, Bell, Eye, Shield, Zap } from 'lucide-react'
+import { Wallet, Copy, Check, Music, DollarSign, Heart, LogOut, TrendingUp, Play, Clock, Settings, Bell, Eye, Shield, Zap, Loader2 } from 'lucide-react'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { useWallet } from '../contexts/WalletContext'
 
 export default function Profile() {
   const [copied, setCopied] = useState(false)
-  const [isConnected] = useState(true) // Change to false to see connect state
   const [hoveredCard, setHoveredCard] = useState<string | null>(null)
   const [hoveredActivity, setHoveredActivity] = useState<number | null>(null)
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
   const isMobile = useIsMobile()
+  const { identityKey, isConnected, isConnecting, connect, disconnect } = useWallet()
 
-  const walletAddress = '0x7a9f3b2c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a'
-  const shortAddress = `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+  const shortAddress = identityKey ? `${identityKey.slice(0, 6)}...${identityKey.slice(-4)}` : ''
 
   const balance = 125.50
   const likedSongs = 23
@@ -20,9 +20,11 @@ export default function Profile() {
   const totalStreams = 1247
 
   const handleCopyAddress = () => {
-    navigator.clipboard.writeText(walletAddress)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    if (identityKey) {
+      navigator.clipboard.writeText(identityKey)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
   }
 
   const recentActivity = [
@@ -121,6 +123,8 @@ export default function Profile() {
 
             {/* Connect Button */}
             <button
+              onClick={connect}
+              disabled={isConnecting}
               onMouseEnter={() => setHoveredButton('connect')}
               onMouseLeave={() => setHoveredButton(null)}
               style={{
@@ -128,28 +132,38 @@ export default function Profile() {
                 padding: isMobile ? '16px 24px' : '20px 32px',
                 borderRadius: isMobile ? '14px' : '16px',
                 border: 'none',
-                background: 'linear-gradient(135deg, #9333ea 0%, #db2777 100%)',
+                background: isConnecting ? 'rgba(147, 51, 234, 0.5)' : 'linear-gradient(135deg, #9333ea 0%, #db2777 100%)',
                 color: 'white',
                 fontSize: isMobile ? '16px' : '18px',
                 fontWeight: '700',
-                cursor: 'pointer',
+                cursor: isConnecting ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '12px',
-                boxShadow: hoveredButton === 'connect'
+                boxShadow: hoveredButton === 'connect' && !isConnecting
                   ? '0 20px 60px rgba(147, 51, 234, 0.5)'
                   : '0 10px 40px rgba(147, 51, 234, 0.3)',
-                transform: hoveredButton === 'connect' ? 'translateY(-4px) scale(1.02)' : 'translateY(0)',
+                transform: hoveredButton === 'connect' && !isConnecting ? 'translateY(-4px) scale(1.02)' : 'translateY(0)',
                 transition: 'all 0.3s ease',
+                opacity: isConnecting ? 0.7 : 1,
               }}
             >
-              <Wallet style={{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }} />
-              <span>Connect Wallet</span>
+              {isConnecting ? (
+                <>
+                  <Loader2 style={{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px', animation: 'spin 1s linear infinite' }} />
+                  <span>Connecting...</span>
+                </>
+              ) : (
+                <>
+                  <Wallet style={{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }} />
+                  <span>Connect Wallet</span>
+                </>
+              )}
             </button>
 
             <p style={{ fontSize: isMobile ? '13px' : '14px', color: 'rgba(255, 255, 255, 0.4)', marginTop: '16px' }}>
-              We support MetaMask, Coinbase Wallet, and more
+              BSV wallet required
             </p>
 
             {/* Benefits Card */}
@@ -339,31 +353,13 @@ export default function Profile() {
                         <Copy style={{ width: isMobile ? '16px' : '18px', height: isMobile ? '16px' : '18px', color: 'rgba(255, 255, 255, 0.6)' }} />
                       )}
                     </button>
-                    <a
-                      href={`https://etherscan.io/address/${walletAddress}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onMouseEnter={() => setHoveredButton('link')}
-                      onMouseLeave={() => setHoveredButton(null)}
-                      style={{
-                        width: isMobile ? '34px' : '40px',
-                        height: isMobile ? '34px' : '40px',
-                        borderRadius: isMobile ? '8px' : '10px',
-                        background: hoveredButton === 'link' ? 'rgba(147, 51, 234, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.2s ease',
-                      }}
-                    >
-                      <ExternalLink style={{ width: isMobile ? '16px' : '18px', height: isMobile ? '16px' : '18px', color: 'rgba(255, 255, 255, 0.6)' }} />
-                    </a>
                   </div>
                 </div>
               </div>
 
               {/* Disconnect Button */}
               <button
+                onClick={disconnect}
                 onMouseEnter={() => setHoveredButton('disconnect')}
                 onMouseLeave={() => setHoveredButton(null)}
                 style={{
