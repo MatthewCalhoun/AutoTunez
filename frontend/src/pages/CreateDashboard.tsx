@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Upload, Sparkles, Crown, Play, TrendingUp, Music, DollarSign, Headphones, ChevronRight, Zap, BarChart3 } from 'lucide-react'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const mockCreatorSongs = [
   {
@@ -42,20 +43,28 @@ const mockCreatorSongs = [
 export default function CreateDashboard() {
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [hoveredCard, setHoveredCard] = useState<string | null>(null)
+  const isMobile = useIsMobile()
 
   const totalEarnings = mockCreatorSongs.reduce((sum, song) => sum + song.earnings, 0)
   const totalStreams = mockCreatorSongs.reduce((sum, song) => sum + song.totalStreams, 0)
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000', color: 'white', position: 'relative', overflow: 'hidden' }}>
+    <div style={{
+      minHeight: '100vh',
+      background: '#000',
+      color: 'white',
+      position: 'relative',
+      overflow: 'hidden',
+      paddingBottom: isMobile ? '100px' : '0',
+    }}>
       {/* Animated Background */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
         <div style={{
           position: 'absolute',
           top: '-10%',
           right: '10%',
-          width: '600px',
-          height: '600px',
+          width: isMobile ? '300px' : '600px',
+          height: isMobile ? '300px' : '600px',
           background: 'radial-gradient(circle, rgba(147, 51, 234, 0.2) 0%, transparent 70%)',
           borderRadius: '50%',
           filter: 'blur(80px)',
@@ -64,8 +73,8 @@ export default function CreateDashboard() {
           position: 'absolute',
           bottom: '10%',
           left: '5%',
-          width: '500px',
-          height: '500px',
+          width: isMobile ? '250px' : '500px',
+          height: isMobile ? '250px' : '500px',
           background: 'radial-gradient(circle, rgba(219, 39, 119, 0.15) 0%, transparent 70%)',
           borderRadius: '50%',
           filter: 'blur(80px)',
@@ -74,33 +83,37 @@ export default function CreateDashboard() {
           position: 'absolute',
           top: '40%',
           left: '40%',
-          width: '400px',
-          height: '400px',
+          width: isMobile ? '200px' : '400px',
+          height: isMobile ? '200px' : '400px',
           background: 'radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%)',
           borderRadius: '50%',
           filter: 'blur(80px)',
         }} className="animate-pulse-slow animation-delay-4000" />
       </div>
 
-      <div style={{ position: 'relative', zIndex: 1, padding: '40px' }}>
+      <div style={{
+        position: 'relative',
+        zIndex: 1,
+        padding: isMobile ? '20px 16px' : '40px',
+      }}>
         {/* Hero Header */}
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+        <div style={{ textAlign: 'center', marginBottom: isMobile ? '32px' : '48px' }}>
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '8px 16px',
+            padding: isMobile ? '6px 12px' : '8px 16px',
             borderRadius: '100px',
             background: 'rgba(147, 51, 234, 0.15)',
             border: '1px solid rgba(147, 51, 234, 0.3)',
-            marginBottom: '20px',
+            marginBottom: isMobile ? '16px' : '20px',
           }}>
-            <Sparkles style={{ width: '16px', height: '16px', color: '#a855f7' }} />
-            <span style={{ fontSize: '13px', color: '#c4b5fd', fontWeight: '500' }}>AI-Powered Creator Tools</span>
+            <Sparkles style={{ width: isMobile ? '14px' : '16px', height: isMobile ? '14px' : '16px', color: '#a855f7' }} />
+            <span style={{ fontSize: isMobile ? '12px' : '13px', color: '#c4b5fd', fontWeight: '500' }}>AI-Powered Creator Tools</span>
           </div>
 
           <h1 style={{
-            fontSize: '52px',
+            fontSize: isMobile ? '32px' : '52px',
             fontWeight: '800',
             margin: '0 0 12px 0',
             background: 'linear-gradient(135deg, #ffffff 0%, #a855f7 50%, #ec4899 100%)',
@@ -110,7 +123,7 @@ export default function CreateDashboard() {
           }}>
             Creator Studio
           </h1>
-          <p style={{ fontSize: '18px', color: '#9ca3af', margin: 0 }}>
+          <p style={{ fontSize: isMobile ? '15px' : '18px', color: '#9ca3af', margin: 0 }}>
             Create, publish, and earn from your AI-generated music
           </p>
         </div>
@@ -119,55 +132,58 @@ export default function CreateDashboard() {
         <div style={{
           display: 'flex',
           justifyContent: 'center',
-          gap: '24px',
-          marginBottom: '48px',
+          gap: isMobile ? '12px' : '24px',
+          marginBottom: isMobile ? '32px' : '48px',
           flexWrap: 'wrap',
         }}>
           <StatCard
-            icon={<DollarSign style={{ width: '24px', height: '24px' }} />}
+            icon={<DollarSign style={{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }} />}
             value={`$${totalEarnings.toFixed(2)}`}
             label="Total Earnings"
             gradient="from-green-500 to-emerald-500"
             valueColor="#4ade80"
+            isMobile={isMobile}
           />
           <StatCard
-            icon={<Headphones style={{ width: '24px', height: '24px' }} />}
-            value={totalStreams.toLocaleString()}
+            icon={<Headphones style={{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }} />}
+            value={isMobile ? `${(totalStreams / 1000).toFixed(1)}k` : totalStreams.toLocaleString()}
             label="Total Streams"
             gradient="from-purple-500 to-pink-500"
             valueColor="#e879f9"
+            isMobile={isMobile}
           />
           <StatCard
-            icon={<Music style={{ width: '24px', height: '24px' }} />}
+            icon={<Music style={{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px' }} />}
             value={mockCreatorSongs.length.toString()}
-            label="Published Tracks"
+            label="Published"
             gradient="from-cyan-500 to-blue-500"
             valueColor="#22d3ee"
+            isMobile={isMobile}
           />
         </div>
 
         {/* Quick Actions */}
-        <div style={{ marginBottom: '64px' }}>
+        <div style={{ marginBottom: isMobile ? '32px' : '64px' }}>
           <h2 style={{
-            fontSize: '14px',
+            fontSize: isMobile ? '12px' : '14px',
             fontWeight: '600',
             color: '#6b7280',
             textTransform: 'uppercase',
             letterSpacing: '1px',
-            marginBottom: '20px',
+            marginBottom: isMobile ? '16px' : '20px',
             textAlign: 'center',
           }}>Quick Actions</h2>
 
           <div style={{
             display: 'flex',
             justifyContent: 'center',
-            gap: '24px',
+            gap: isMobile ? '12px' : '24px',
             flexWrap: 'wrap',
           }}>
             {/* Generate with AI */}
             <ActionCard
-              icon={<Sparkles style={{ width: '28px', height: '28px' }} />}
-              title="Generate with AI"
+              icon={<Sparkles style={{ width: isMobile ? '24px' : '28px', height: isMobile ? '24px' : '28px' }} />}
+              title={isMobile ? "Generate" : "Generate with AI"}
               subtitle="$0.20 per track"
               gradient="linear-gradient(135deg, #9333ea, #db2777)"
               isHovered={hoveredCard === 'generate'}
@@ -175,28 +191,31 @@ export default function CreateDashboard() {
               onLeave={() => setHoveredCard(null)}
               onClick={() => setShowUploadModal(true)}
               isPrimary
+              isMobile={isMobile}
             />
 
             {/* Upload Track */}
             <ActionCard
-              icon={<Upload style={{ width: '28px', height: '28px' }} />}
-              title="Upload Track"
+              icon={<Upload style={{ width: isMobile ? '24px' : '28px', height: isMobile ? '24px' : '28px' }} />}
+              title="Upload"
               subtitle="Your own music"
               isHovered={hoveredCard === 'upload'}
               onHover={() => setHoveredCard('upload')}
               onLeave={() => setHoveredCard(null)}
               onClick={() => {}}
+              isMobile={isMobile}
             />
 
             {/* Analytics */}
             <ActionCard
-              icon={<BarChart3 style={{ width: '28px', height: '28px' }} />}
+              icon={<BarChart3 style={{ width: isMobile ? '24px' : '28px', height: isMobile ? '24px' : '28px' }} />}
               title="Analytics"
               subtitle="View insights"
               isHovered={hoveredCard === 'analytics'}
               onHover={() => setHoveredCard('analytics')}
               onLeave={() => setHoveredCard(null)}
               onClick={() => {}}
+              isMobile={isMobile}
             />
           </div>
         </div>
@@ -204,74 +223,16 @@ export default function CreateDashboard() {
         {/* Main Content Grid */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 340px',
-          gap: '32px',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 340px',
+          gap: isMobile ? '20px' : '32px',
           maxWidth: '1400px',
           margin: '0 auto',
         }}>
-          {/* Your Tracks */}
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))',
-            borderRadius: '24px',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            overflow: 'hidden',
-          }}>
+          {/* Mobile: Balance Card First */}
+          {isMobile && (
             <div style={{
-              padding: '24px 28px',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #9333ea, #db2777)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <Music style={{ width: '20px', height: '20px', color: 'white' }} />
-                </div>
-                <div>
-                  <h2 style={{ fontSize: '20px', fontWeight: '700', margin: 0, color: 'white' }}>Your Tracks</h2>
-                  <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>{mockCreatorSongs.length} published</p>
-                </div>
-              </div>
-              <button style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '10px 16px',
-                borderRadius: '10px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#9ca3af',
-                fontSize: '13px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-              }} className="hover:bg-white/10">
-                View All
-                <ChevronRight style={{ width: '16px', height: '16px' }} />
-              </button>
-            </div>
-
-            <div>
-              {mockCreatorSongs.map((song, index) => (
-                <TrackRow key={song.id} song={song} index={index} />
-              ))}
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Available Balance */}
-            <div style={{
-              padding: '28px',
-              borderRadius: '24px',
+              padding: '24px',
+              borderRadius: '20px',
               background: 'linear-gradient(145deg, rgba(34, 197, 94, 0.12), rgba(16, 185, 129, 0.08))',
               border: '1px solid rgba(34, 197, 94, 0.25)',
               position: 'relative',
@@ -281,175 +242,288 @@ export default function CreateDashboard() {
                 position: 'absolute',
                 top: '-20px',
                 right: '-20px',
-                width: '100px',
-                height: '100px',
+                width: '80px',
+                height: '80px',
                 background: 'rgba(34, 197, 94, 0.15)',
                 borderRadius: '50%',
                 filter: 'blur(30px)',
               }} />
-              <div style={{ position: 'relative' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                  <DollarSign style={{ width: '18px', height: '18px', color: '#4ade80' }} />
-                  <span style={{ fontSize: '12px', fontWeight: '600', color: '#86efac', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                    Available Balance
-                  </span>
-                </div>
-                <div style={{
-                  fontSize: '42px',
-                  fontWeight: '800',
-                  color: '#4ade80',
-                  marginBottom: '20px',
-                  lineHeight: 1,
-                }}>
-                  ${totalEarnings.toFixed(2)}
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                    <DollarSign style={{ width: '16px', height: '16px', color: '#4ade80' }} />
+                    <span style={{ fontSize: '11px', fontWeight: '600', color: '#86efac', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      Balance
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '32px', fontWeight: '800', color: '#4ade80' }}>
+                    ${totalEarnings.toFixed(2)}
+                  </div>
                 </div>
                 <button style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '14px',
+                  padding: '12px 20px',
+                  borderRadius: '12px',
                   background: 'linear-gradient(135deg, #22c55e, #10b981)',
                   border: 'none',
                   color: 'black',
-                  fontSize: '15px',
+                  fontSize: '14px',
                   fontWeight: '700',
                   cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 8px 24px rgba(34, 197, 94, 0.3)',
+                  boxShadow: '0 4px 16px rgba(34, 197, 94, 0.3)',
                 }}>
-                  Withdraw Funds
+                  Withdraw
                 </button>
               </div>
             </div>
+          )}
 
-            {/* Top Performing */}
+          {/* Your Tracks */}
+          <div style={{
+            background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))',
+            borderRadius: isMobile ? '20px' : '24px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            overflow: 'hidden',
+          }}>
             <div style={{
-              padding: '24px',
-              borderRadius: '24px',
-              background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              padding: isMobile ? '16px' : '24px 28px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                <Zap style={{ width: '18px', height: '18px', color: '#fbbf24' }} />
-                <span style={{ fontSize: '12px', fontWeight: '600', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                  Top Performing
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '12px' }}>
                 <div style={{
-                  width: '56px',
-                  height: '56px',
-                  borderRadius: '12px',
-                  overflow: 'hidden',
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
-                }}>
-                  <img
-                    src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop"
-                    alt="Neon Nights"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'white', margin: '0 0 4px 0' }}>Neon Nights</h3>
-                  <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>2,341 streams</p>
-                </div>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '14px',
-                borderRadius: '12px',
-                background: 'rgba(255, 255, 255, 0.03)',
-              }}>
-                <span style={{ fontSize: '13px', color: '#9ca3af' }}>Weekly Growth</span>
-                <span style={{
-                  fontSize: '15px',
-                  fontWeight: '700',
-                  color: '#4ade80',
+                  width: isMobile ? '36px' : '40px',
+                  height: isMobile ? '36px' : '40px',
+                  borderRadius: isMobile ? '10px' : '12px',
+                  background: 'linear-gradient(135deg, #9333ea, #db2777)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  justifyContent: 'center',
                 }}>
-                  <TrendingUp style={{ width: '16px', height: '16px' }} />
-                  +127%
-                </span>
+                  <Music style={{ width: isMobile ? '18px' : '20px', height: isMobile ? '18px' : '20px', color: 'white' }} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: isMobile ? '16px' : '20px', fontWeight: '700', margin: 0, color: 'white' }}>Your Tracks</h2>
+                  <p style={{ fontSize: isMobile ? '12px' : '13px', color: '#6b7280', margin: 0 }}>{mockCreatorSongs.length} published</p>
+                </div>
               </div>
+              {!isMobile && (
+                <button style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: '#9ca3af',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }} className="hover:bg-white/10">
+                  View All
+                  <ChevronRight style={{ width: '16px', height: '16px' }} />
+                </button>
+              )}
             </div>
 
-            {/* This Month Stats */}
-            <div style={{
-              padding: '24px',
-              borderRadius: '24px',
-              background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                <BarChart3 style={{ width: '18px', height: '18px', color: '#a855f7' }} />
-                <span style={{ fontSize: '12px', fontWeight: '600', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                  This Month
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <MonthStatRow label="New Streams" value="+1,247" />
-                <MonthStatRow label="Revenue" value="+$89.40" isGreen />
-                <MonthStatRow label="New Followers" value="+23" />
-              </div>
+            <div>
+              {mockCreatorSongs.map((song, index) => (
+                <TrackRow key={song.id} song={song} index={index} isMobile={isMobile} />
+              ))}
             </div>
           </div>
+
+          {/* Sidebar - Desktop Only */}
+          {!isMobile && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Available Balance */}
+              <div style={{
+                padding: '28px',
+                borderRadius: '24px',
+                background: 'linear-gradient(145deg, rgba(34, 197, 94, 0.12), rgba(16, 185, 129, 0.08))',
+                border: '1px solid rgba(34, 197, 94, 0.25)',
+                position: 'relative',
+                overflow: 'hidden',
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: '-20px',
+                  right: '-20px',
+                  width: '100px',
+                  height: '100px',
+                  background: 'rgba(34, 197, 94, 0.15)',
+                  borderRadius: '50%',
+                  filter: 'blur(30px)',
+                }} />
+                <div style={{ position: 'relative' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                    <DollarSign style={{ width: '18px', height: '18px', color: '#4ade80' }} />
+                    <span style={{ fontSize: '12px', fontWeight: '600', color: '#86efac', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                      Available Balance
+                    </span>
+                  </div>
+                  <div style={{
+                    fontSize: '42px',
+                    fontWeight: '800',
+                    color: '#4ade80',
+                    marginBottom: '20px',
+                    lineHeight: 1,
+                  }}>
+                    ${totalEarnings.toFixed(2)}
+                  </div>
+                  <button style={{
+                    width: '100%',
+                    padding: '14px',
+                    borderRadius: '14px',
+                    background: 'linear-gradient(135deg, #22c55e, #10b981)',
+                    border: 'none',
+                    color: 'black',
+                    fontSize: '15px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 8px 24px rgba(34, 197, 94, 0.3)',
+                  }}>
+                    Withdraw Funds
+                  </button>
+                </div>
+              </div>
+
+              {/* Top Performing */}
+              <div style={{
+                padding: '24px',
+                borderRadius: '24px',
+                background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+                  <Zap style={{ width: '18px', height: '18px', color: '#fbbf24' }} />
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    Top Performing
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
+                  <div style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
+                  }}>
+                    <img
+                      src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop"
+                      alt="Neon Nights"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'white', margin: '0 0 4px 0' }}>Neon Nights</h3>
+                    <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>2,341 streams</p>
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '14px',
+                  borderRadius: '12px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                }}>
+                  <span style={{ fontSize: '13px', color: '#9ca3af' }}>Weekly Growth</span>
+                  <span style={{
+                    fontSize: '15px',
+                    fontWeight: '700',
+                    color: '#4ade80',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}>
+                    <TrendingUp style={{ width: '16px', height: '16px' }} />
+                    +127%
+                  </span>
+                </div>
+              </div>
+
+              {/* This Month Stats */}
+              <div style={{
+                padding: '24px',
+                borderRadius: '24px',
+                background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+                  <BarChart3 style={{ width: '18px', height: '18px', color: '#a855f7' }} />
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    This Month
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <MonthStatRow label="New Streams" value="+1,247" />
+                  <MonthStatRow label="Revenue" value="+$89.40" isGreen />
+                  <MonthStatRow label="New Followers" value="+23" />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Upload Modal */}
-      {showUploadModal && <UploadModal onClose={() => setShowUploadModal(false)} />}
+      {showUploadModal && <UploadModal onClose={() => setShowUploadModal(false)} isMobile={isMobile} />}
     </div>
   )
 }
 
-function StatCard({ icon, value, label, gradient, valueColor }: {
+function StatCard({ icon, value, label, gradient, valueColor, isMobile }: {
   icon: React.ReactNode
   value: string
   label: string
   gradient: string
   valueColor: string
+  isMobile: boolean
 }) {
   return (
     <div style={{
-      padding: '24px 32px',
-      borderRadius: '20px',
+      padding: isMobile ? '16px 20px' : '24px 32px',
+      borderRadius: isMobile ? '16px' : '20px',
       background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))',
       border: '1px solid rgba(255, 255, 255, 0.08)',
-      minWidth: '200px',
+      minWidth: isMobile ? '100px' : '200px',
       textAlign: 'center',
+      flex: isMobile ? '1' : 'none',
     }}>
       <div
         className={`bg-gradient-to-r ${gradient}`}
         style={{
-          width: '48px',
-          height: '48px',
-          borderRadius: '14px',
+          width: isMobile ? '40px' : '48px',
+          height: isMobile ? '40px' : '48px',
+          borderRadius: isMobile ? '12px' : '14px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: '0 auto 16px',
+          margin: '0 auto 12px',
           color: 'white',
         }}
       >
         {icon}
       </div>
-      <div style={{ fontSize: '32px', fontWeight: '800', color: valueColor, marginBottom: '4px' }}>
+      <div style={{ fontSize: isMobile ? '22px' : '32px', fontWeight: '800', color: valueColor, marginBottom: '4px' }}>
         {value}
       </div>
-      <div style={{ fontSize: '13px', color: '#6b7280', fontWeight: '500' }}>
+      <div style={{ fontSize: isMobile ? '11px' : '13px', color: '#6b7280', fontWeight: '500' }}>
         {label}
       </div>
     </div>
   )
 }
 
-function ActionCard({ icon, title, subtitle, gradient, isHovered, onHover, onLeave, onClick, isPrimary }: {
+function ActionCard({ icon, title, subtitle, gradient, isHovered, onHover, onLeave, onClick, isPrimary, isMobile }: {
   icon: React.ReactNode
   title: string
   subtitle: string
@@ -459,6 +533,7 @@ function ActionCard({ icon, title, subtitle, gradient, isHovered, onHover, onLea
   onLeave: () => void
   onClick: () => void
   isPrimary?: boolean
+  isMobile: boolean
 }) {
   return (
     <div
@@ -466,9 +541,9 @@ function ActionCard({ icon, title, subtitle, gradient, isHovered, onHover, onLea
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
       style={{
-        width: '240px',
-        padding: '32px 24px',
-        borderRadius: '24px',
+        width: isMobile ? '100px' : '240px',
+        padding: isMobile ? '20px 16px' : '32px 24px',
+        borderRadius: isMobile ? '16px' : '24px',
         background: isPrimary
           ? 'linear-gradient(145deg, rgba(147, 51, 234, 0.15), rgba(219, 39, 119, 0.1))'
           : 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))',
@@ -487,14 +562,14 @@ function ActionCard({ icon, title, subtitle, gradient, isHovered, onHover, onLea
       }}
     >
       <div style={{
-        width: '64px',
-        height: '64px',
-        borderRadius: '20px',
+        width: isMobile ? '48px' : '64px',
+        height: isMobile ? '48px' : '64px',
+        borderRadius: isMobile ? '14px' : '20px',
         background: isPrimary ? gradient : 'rgba(255, 255, 255, 0.08)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        margin: '0 auto 20px',
+        margin: '0 auto 12px',
         color: isPrimary ? 'white' : '#9ca3af',
         transition: 'all 0.3s ease',
         transform: isHovered ? 'scale(1.1)' : 'scale(1)',
@@ -502,18 +577,69 @@ function ActionCard({ icon, title, subtitle, gradient, isHovered, onHover, onLea
       }}>
         {icon}
       </div>
-      <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'white', margin: '0 0 6px 0' }}>
+      <h3 style={{ fontSize: isMobile ? '13px' : '18px', fontWeight: '700', color: 'white', margin: '0 0 4px 0' }}>
         {title}
       </h3>
-      <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
+      <p style={{ fontSize: isMobile ? '10px' : '14px', color: '#6b7280', margin: 0 }}>
         {subtitle}
       </p>
     </div>
   )
 }
 
-function TrackRow({ song, index }: { song: typeof mockCreatorSongs[0]; index: number }) {
+function TrackRow({ song, index, isMobile }: { song: typeof mockCreatorSongs[0]; index: number; isMobile: boolean }) {
   const [isHovered, setIsHovered] = useState(false)
+
+  if (isMobile) {
+    return (
+      <div
+        style={{
+          padding: '14px 16px',
+          borderBottom: index < mockCreatorSongs.length - 1 ? '1px solid rgba(255, 255, 255, 0.06)' : 'none',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+        }}
+      >
+        {/* Cover */}
+        <div style={{
+          width: '48px',
+          height: '48px',
+          borderRadius: '10px',
+          overflow: 'hidden',
+          flexShrink: 0,
+        }}>
+          <img src={song.coverUrl} alt={song.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+
+        {/* Info */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <h3 style={{
+              fontSize: '14px',
+              fontWeight: '600',
+              color: 'white',
+              margin: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>{song.title}</h3>
+            {song.isExclusive && (
+              <Crown style={{ width: '12px', height: '12px', color: '#fbbf24', flexShrink: 0 }} />
+            )}
+          </div>
+          <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>
+            {song.totalStreams.toLocaleString()} streams
+          </p>
+        </div>
+
+        {/* Earnings */}
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '15px', fontWeight: '700', color: '#4ade80' }}>${song.earnings.toFixed(2)}</div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -617,7 +743,7 @@ function MonthStatRow({ label, value, isGreen }: { label: string; value: string;
   )
 }
 
-function UploadModal({ onClose }: { onClose: () => void }) {
+function UploadModal({ onClose, isMobile }: { onClose: () => void; isMobile: boolean }) {
   const [step, setStep] = useState<'generate' | 'details' | 'pricing'>('generate')
   const [prompt, setPrompt] = useState('')
   const [title, setTitle] = useState('')
@@ -632,37 +758,39 @@ function UploadModal({ onClose }: { onClose: () => void }) {
       inset: 0,
       zIndex: 50,
       display: 'flex',
-      alignItems: 'center',
+      alignItems: isMobile ? 'flex-end' : 'center',
       justifyContent: 'center',
-      padding: '16px',
+      padding: isMobile ? '0' : '16px',
       background: 'rgba(0, 0, 0, 0.85)',
       backdropFilter: 'blur(12px)',
     }}>
       <div style={{
         background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.98), rgba(20, 20, 25, 0.99))',
         border: '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '32px',
-        padding: '40px',
+        borderRadius: isMobile ? '24px 24px 0 0' : '32px',
+        padding: isMobile ? '24px 20px 40px' : '40px',
         maxWidth: '480px',
         width: '100%',
         boxShadow: '0 40px 80px rgba(0, 0, 0, 0.5), 0 0 100px rgba(147, 51, 234, 0.1)',
+        maxHeight: isMobile ? '90vh' : 'auto',
+        overflowY: 'auto',
       }}>
         {/* Progress Steps */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '40px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: isMobile ? '8px' : '12px', marginBottom: isMobile ? '28px' : '40px' }}>
           {[1, 2, 3].map((num) => {
             const stepIndex = ['generate', 'details', 'pricing'].indexOf(step)
             const isActive = num - 1 === stepIndex
             const isComplete = num - 1 < stepIndex
             return (
-              <div key={num} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div key={num} style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '12px' }}>
                 <div style={{
-                  width: '44px',
-                  height: '44px',
+                  width: isMobile ? '36px' : '44px',
+                  height: isMobile ? '36px' : '44px',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '15px',
+                  fontSize: isMobile ? '13px' : '15px',
                   fontWeight: '700',
                   transition: 'all 0.3s ease',
                   background: isActive
@@ -678,7 +806,7 @@ function UploadModal({ onClose }: { onClose: () => void }) {
                 </div>
                 {num < 3 && (
                   <div style={{
-                    width: '40px',
+                    width: isMobile ? '24px' : '40px',
                     height: '3px',
                     borderRadius: '2px',
                     background: isComplete ? 'linear-gradient(90deg, #9333ea, #db2777)' : 'rgba(255, 255, 255, 0.1)',
@@ -692,36 +820,36 @@ function UploadModal({ onClose }: { onClose: () => void }) {
         {step === 'generate' && (
           <div style={{ textAlign: 'center' }}>
             <div style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: '24px',
+              width: isMobile ? '64px' : '80px',
+              height: isMobile ? '64px' : '80px',
+              borderRadius: isMobile ? '20px' : '24px',
               background: 'linear-gradient(135deg, #9333ea, #db2777)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              margin: '0 auto 24px',
+              margin: '0 auto 20px',
               boxShadow: '0 12px 32px rgba(147, 51, 234, 0.4)',
             }}>
-              <Sparkles style={{ width: '36px', height: '36px', color: 'white' }} />
+              <Sparkles style={{ width: isMobile ? '28px' : '36px', height: isMobile ? '28px' : '36px', color: 'white' }} />
             </div>
-            <h2 style={{ fontSize: '28px', fontWeight: '800', color: 'white', margin: '0 0 8px 0' }}>Describe Your Track</h2>
-            <p style={{ fontSize: '15px', color: '#9ca3af', margin: '0 0 28px 0' }}>What kind of music do you want to create?</p>
+            <h2 style={{ fontSize: isMobile ? '22px' : '28px', fontWeight: '800', color: 'white', margin: '0 0 8px 0' }}>Describe Your Track</h2>
+            <p style={{ fontSize: isMobile ? '14px' : '15px', color: '#9ca3af', margin: '0 0 24px 0' }}>What kind of music do you want to create?</p>
 
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g., Chill lofi beats with warm piano and soft drums..."
+              placeholder="e.g., Chill lofi beats with warm piano..."
               style={{
                 width: '100%',
-                padding: '20px',
-                borderRadius: '16px',
+                padding: isMobile ? '16px' : '20px',
+                borderRadius: isMobile ? '14px' : '16px',
                 background: 'rgba(255, 255, 255, 0.05)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 color: 'white',
-                fontSize: '15px',
+                fontSize: isMobile ? '14px' : '15px',
                 resize: 'none',
                 outline: 'none',
-                marginBottom: '20px',
+                marginBottom: '16px',
                 textAlign: 'center',
                 lineHeight: 1.6,
               }}
@@ -733,15 +861,15 @@ function UploadModal({ onClose }: { onClose: () => void }) {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '12px 20px',
+              padding: isMobile ? '10px 16px' : '12px 20px',
               borderRadius: '100px',
               background: 'rgba(147, 51, 234, 0.1)',
               border: '1px solid rgba(147, 51, 234, 0.2)',
-              marginBottom: '28px',
+              marginBottom: '24px',
             }}>
               <Sparkles style={{ width: '16px', height: '16px', color: '#a855f7' }} />
-              <span style={{ fontSize: '14px', color: '#9ca3af' }}>Generation cost:</span>
-              <span style={{ fontSize: '14px', color: 'white', fontWeight: '700' }}>$0.20</span>
+              <span style={{ fontSize: isMobile ? '13px' : '14px', color: '#9ca3af' }}>Cost:</span>
+              <span style={{ fontSize: isMobile ? '13px' : '14px', color: 'white', fontWeight: '700' }}>$0.20</span>
             </div>
 
             <div style={{ display: 'flex', gap: '12px' }}>
@@ -749,12 +877,12 @@ function UploadModal({ onClose }: { onClose: () => void }) {
                 onClick={onClose}
                 style={{
                   flex: 1,
-                  padding: '16px',
+                  padding: isMobile ? '14px' : '16px',
                   borderRadius: '14px',
                   background: 'transparent',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   color: 'white',
-                  fontSize: '15px',
+                  fontSize: isMobile ? '14px' : '15px',
                   fontWeight: '600',
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
@@ -767,12 +895,12 @@ function UploadModal({ onClose }: { onClose: () => void }) {
                 disabled={!prompt}
                 style={{
                   flex: 1,
-                  padding: '16px',
+                  padding: isMobile ? '14px' : '16px',
                   borderRadius: '14px',
                   background: 'linear-gradient(135deg, #9333ea, #db2777)',
                   border: 'none',
                   color: 'white',
-                  fontSize: '15px',
+                  fontSize: isMobile ? '14px' : '15px',
                   fontWeight: '700',
                   cursor: prompt ? 'pointer' : 'not-allowed',
                   opacity: prompt ? 1 : 0.4,
@@ -788,10 +916,10 @@ function UploadModal({ onClose }: { onClose: () => void }) {
 
         {step === 'details' && (
           <div>
-            <h2 style={{ fontSize: '28px', fontWeight: '800', color: 'white', margin: '0 0 8px 0', textAlign: 'center' }}>Track Details</h2>
-            <p style={{ fontSize: '15px', color: '#9ca3af', margin: '0 0 28px 0', textAlign: 'center' }}>Name your creation</p>
+            <h2 style={{ fontSize: isMobile ? '22px' : '28px', fontWeight: '800', color: 'white', margin: '0 0 8px 0', textAlign: 'center' }}>Track Details</h2>
+            <p style={{ fontSize: isMobile ? '14px' : '15px', color: '#9ca3af', margin: '0 0 24px 0', textAlign: 'center' }}>Name your creation</p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '28px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
               <input
                 type="text"
                 value={title}
@@ -799,12 +927,12 @@ function UploadModal({ onClose }: { onClose: () => void }) {
                 placeholder="Track title"
                 style={{
                   width: '100%',
-                  padding: '18px 20px',
+                  padding: isMobile ? '16px' : '18px 20px',
                   borderRadius: '14px',
                   background: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
                   color: 'white',
-                  fontSize: '15px',
+                  fontSize: isMobile ? '14px' : '15px',
                   outline: 'none',
                 }}
                 className="placeholder-gray-500 focus:border-purple-500"
@@ -814,12 +942,12 @@ function UploadModal({ onClose }: { onClose: () => void }) {
                 onChange={(e) => setGenre(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '18px 20px',
+                  padding: isMobile ? '16px' : '18px 20px',
                   borderRadius: '14px',
                   background: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
                   color: genre ? 'white' : '#6b7280',
-                  fontSize: '15px',
+                  fontSize: isMobile ? '14px' : '15px',
                   outline: 'none',
                   cursor: 'pointer',
                 }}
@@ -839,12 +967,12 @@ function UploadModal({ onClose }: { onClose: () => void }) {
                 onClick={() => setStep('generate')}
                 style={{
                   flex: 1,
-                  padding: '16px',
+                  padding: isMobile ? '14px' : '16px',
                   borderRadius: '14px',
                   background: 'transparent',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   color: 'white',
-                  fontSize: '15px',
+                  fontSize: isMobile ? '14px' : '15px',
                   fontWeight: '600',
                   cursor: 'pointer',
                 }}
@@ -856,12 +984,12 @@ function UploadModal({ onClose }: { onClose: () => void }) {
                 disabled={!title || !genre}
                 style={{
                   flex: 1,
-                  padding: '16px',
+                  padding: isMobile ? '14px' : '16px',
                   borderRadius: '14px',
                   background: 'linear-gradient(135deg, #9333ea, #db2777)',
                   border: 'none',
                   color: 'white',
-                  fontSize: '15px',
+                  fontSize: isMobile ? '14px' : '15px',
                   fontWeight: '700',
                   cursor: title && genre ? 'pointer' : 'not-allowed',
                   opacity: title && genre ? 1 : 0.4,
@@ -875,12 +1003,12 @@ function UploadModal({ onClose }: { onClose: () => void }) {
 
         {step === 'pricing' && (
           <div>
-            <h2 style={{ fontSize: '28px', fontWeight: '800', color: 'white', margin: '0 0 8px 0', textAlign: 'center' }}>Set Pricing</h2>
-            <p style={{ fontSize: '15px', color: '#9ca3af', margin: '0 0 28px 0', textAlign: 'center' }}>How much per stream?</p>
+            <h2 style={{ fontSize: isMobile ? '22px' : '28px', fontWeight: '800', color: 'white', margin: '0 0 8px 0', textAlign: 'center' }}>Set Pricing</h2>
+            <p style={{ fontSize: isMobile ? '14px' : '15px', color: '#9ca3af', margin: '0 0 24px 0', textAlign: 'center' }}>How much per stream?</p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '28px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
               <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280', fontSize: '18px' }}>$</span>
+                <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280', fontSize: '18px' }}>$</span>
                 <input
                   type="number"
                   value={streamPrice}
@@ -889,12 +1017,12 @@ function UploadModal({ onClose }: { onClose: () => void }) {
                   min="0.01"
                   style={{
                     width: '100%',
-                    padding: '18px 20px 18px 40px',
+                    padding: isMobile ? '16px 16px 16px 36px' : '18px 20px 18px 40px',
                     borderRadius: '14px',
                     background: 'rgba(255, 255, 255, 0.05)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
                     color: 'white',
-                    fontSize: '18px',
+                    fontSize: isMobile ? '16px' : '18px',
                     outline: 'none',
                   }}
                 />
@@ -903,7 +1031,7 @@ function UploadModal({ onClose }: { onClose: () => void }) {
               <div
                 onClick={() => setOfferExclusive(!offerExclusive)}
                 style={{
-                  padding: '20px',
+                  padding: isMobile ? '16px' : '20px',
                   borderRadius: '16px',
                   background: offerExclusive ? 'rgba(245, 158, 11, 0.1)' : 'rgba(255, 255, 255, 0.05)',
                   border: offerExclusive ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
@@ -911,33 +1039,33 @@ function UploadModal({ onClose }: { onClose: () => void }) {
                   transition: 'all 0.3s ease',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <Crown style={{ width: '22px', height: '22px', color: offerExclusive ? '#fbbf24' : '#6b7280' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <Crown style={{ width: '20px', height: '20px', color: offerExclusive ? '#fbbf24' : '#6b7280' }} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '16px', fontWeight: '600', color: 'white' }}>Exclusive Rights</div>
-                    <div style={{ fontSize: '13px', color: '#6b7280' }}>Allow purchase of full ownership</div>
+                    <div style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: '600', color: 'white' }}>Exclusive Rights</div>
+                    <div style={{ fontSize: isMobile ? '12px' : '13px', color: '#6b7280' }}>Allow purchase of full ownership</div>
                   </div>
                   <div style={{
-                    width: '48px',
-                    height: '28px',
-                    borderRadius: '14px',
+                    width: '44px',
+                    height: '26px',
+                    borderRadius: '13px',
                     padding: '3px',
                     background: offerExclusive ? '#fbbf24' : 'rgba(255, 255, 255, 0.2)',
                     transition: 'all 0.3s ease',
                   }}>
                     <div style={{
-                      width: '22px',
-                      height: '22px',
+                      width: '20px',
+                      height: '20px',
                       borderRadius: '50%',
                       background: 'white',
-                      transform: offerExclusive ? 'translateX(20px)' : 'translateX(0)',
+                      transform: offerExclusive ? 'translateX(18px)' : 'translateX(0)',
                       transition: 'transform 0.3s ease',
                     }} />
                   </div>
                 </div>
                 {offerExclusive && (
-                  <div style={{ position: 'relative', marginTop: '16px' }}>
-                    <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }}>$</span>
+                  <div style={{ position: 'relative', marginTop: '14px' }}>
+                    <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }}>$</span>
                     <input
                       type="number"
                       value={exclusivePrice}
@@ -945,12 +1073,12 @@ function UploadModal({ onClose }: { onClose: () => void }) {
                       onClick={(e) => e.stopPropagation()}
                       style={{
                         width: '100%',
-                        padding: '14px 16px 14px 36px',
+                        padding: '12px 14px 12px 32px',
                         borderRadius: '12px',
                         background: 'rgba(0, 0, 0, 0.3)',
                         border: '1px solid rgba(245, 158, 11, 0.3)',
                         color: 'white',
-                        fontSize: '16px',
+                        fontSize: isMobile ? '14px' : '16px',
                         outline: 'none',
                       }}
                     />
@@ -962,25 +1090,25 @@ function UploadModal({ onClose }: { onClose: () => void }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '16px 20px',
+                padding: isMobile ? '14px 16px' : '16px 20px',
                 borderRadius: '14px',
                 background: 'rgba(255, 255, 255, 0.05)',
               }}>
-                <span style={{ fontSize: '14px', color: '#9ca3af' }}>Platform fee</span>
-                <span style={{ fontSize: '14px', color: '#6b7280' }}>40%</span>
+                <span style={{ fontSize: isMobile ? '13px' : '14px', color: '#9ca3af' }}>Platform fee</span>
+                <span style={{ fontSize: isMobile ? '13px' : '14px', color: '#6b7280' }}>40%</span>
               </div>
 
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '16px 20px',
+                padding: isMobile ? '14px 16px' : '16px 20px',
                 borderRadius: '14px',
                 background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.05))',
                 border: '1px solid rgba(34, 197, 94, 0.2)',
               }}>
-                <span style={{ fontSize: '14px', color: '#4ade80' }}>You earn</span>
-                <span style={{ fontSize: '18px', fontWeight: '700', color: '#4ade80' }}>60%</span>
+                <span style={{ fontSize: isMobile ? '13px' : '14px', color: '#4ade80' }}>You earn</span>
+                <span style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: '700', color: '#4ade80' }}>60%</span>
               </div>
             </div>
 
@@ -989,12 +1117,12 @@ function UploadModal({ onClose }: { onClose: () => void }) {
                 onClick={() => setStep('details')}
                 style={{
                   flex: 1,
-                  padding: '16px',
+                  padding: isMobile ? '14px' : '16px',
                   borderRadius: '14px',
                   background: 'transparent',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   color: 'white',
-                  fontSize: '15px',
+                  fontSize: isMobile ? '14px' : '15px',
                   fontWeight: '600',
                   cursor: 'pointer',
                 }}
@@ -1005,12 +1133,12 @@ function UploadModal({ onClose }: { onClose: () => void }) {
                 onClick={onClose}
                 style={{
                   flex: 1,
-                  padding: '16px',
+                  padding: isMobile ? '14px' : '16px',
                   borderRadius: '14px',
                   background: 'white',
                   border: 'none',
                   color: 'black',
-                  fontSize: '15px',
+                  fontSize: isMobile ? '14px' : '15px',
                   fontWeight: '700',
                   cursor: 'pointer',
                   display: 'flex',

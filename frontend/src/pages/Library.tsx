@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Play, Pause, Heart, Grid3x3, List, Search, Music, Clock, Calendar, MoreHorizontal, Library as LibraryIcon, Disc3, Sparkles } from 'lucide-react'
+import { Play, Pause, Heart, Grid3x3, List, Search, Music, Clock, MoreHorizontal, Library as LibraryIcon, Disc3, Sparkles } from 'lucide-react'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 // Mock library data
 const mockLibrarySongs = [
@@ -77,6 +78,7 @@ export default function Library() {
   const [selectedCategory, setSelectedCategory] = useState('songs')
   const [playingId, setPlayingId] = useState<string | null>(null)
   const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const isMobile = useIsMobile()
 
   const filteredSongs = mockLibrarySongs.filter(song =>
     song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -89,15 +91,22 @@ export default function Library() {
     : filteredSongs
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000', color: 'white', position: 'relative', overflow: 'hidden' }}>
+    <div style={{
+      minHeight: '100vh',
+      background: '#000',
+      color: 'white',
+      position: 'relative',
+      overflow: 'hidden',
+      paddingBottom: isMobile ? '100px' : '0',
+    }}>
       {/* Animated Background */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
         <div style={{
           position: 'absolute',
           top: '10%',
-          left: '60%',
-          width: '500px',
-          height: '500px',
+          left: isMobile ? '50%' : '60%',
+          width: isMobile ? '300px' : '500px',
+          height: isMobile ? '300px' : '500px',
           background: 'rgba(147, 51, 234, 0.15)',
           borderRadius: '50%',
           filter: 'blur(120px)',
@@ -105,118 +114,176 @@ export default function Library() {
         <div style={{
           position: 'absolute',
           bottom: '20%',
-          left: '20%',
-          width: '400px',
-          height: '400px',
+          left: isMobile ? '20%' : '20%',
+          width: isMobile ? '250px' : '400px',
+          height: isMobile ? '250px' : '400px',
           background: 'rgba(219, 39, 119, 0.1)',
           borderRadius: '50%',
           filter: 'blur(120px)',
         }} className="animate-pulse-slow animation-delay-2000" />
       </div>
 
-      <div style={{ display: 'flex', minHeight: 'calc(100vh - 64px)', position: 'relative', zIndex: 1 }}>
-        {/* Sidebar */}
-        <div style={{
-          width: '280px',
-          borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-          padding: '32px 24px',
-          background: 'linear-gradient(180deg, rgba(20, 20, 25, 0.8) 0%, rgba(10, 10, 15, 0.9) 100%)',
-          backdropFilter: 'blur(20px)',
-        }}>
-          {/* Library Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #9333ea, #db2777)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <LibraryIcon style={{ width: '20px', height: '20px', color: 'white' }} />
+      <div style={{
+        display: 'flex',
+        minHeight: isMobile ? 'auto' : 'calc(100vh - 64px)',
+        position: 'relative',
+        zIndex: 1,
+      }}>
+        {/* Sidebar - Hidden on Mobile */}
+        {!isMobile && (
+          <div style={{
+            width: '280px',
+            borderRight: '1px solid rgba(255, 255, 255, 0.08)',
+            padding: '32px 24px',
+            background: 'linear-gradient(180deg, rgba(20, 20, 25, 0.8) 0%, rgba(10, 10, 15, 0.9) 100%)',
+            backdropFilter: 'blur(20px)',
+          }}>
+            {/* Library Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #9333ea, #db2777)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <LibraryIcon style={{ width: '20px', height: '20px', color: 'white' }} />
+              </div>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'white', margin: 0 }}>Your Library</h2>
+                <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>{mockLibrarySongs.length} tracks</p>
+              </div>
             </div>
-            <div>
-              <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'white', margin: 0 }}>Your Library</h2>
-              <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>{mockLibrarySongs.length} tracks</p>
-            </div>
-          </div>
 
-          {/* Navigation */}
-          <div style={{ marginBottom: '40px' }}>
-            <p style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>
-              Browse
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <SidebarItem
-                icon={<Music style={{ width: '18px', height: '18px' }} />}
-                label="All Songs"
-                active={selectedCategory === 'songs'}
-                count={mockLibrarySongs.length}
-                onClick={() => setSelectedCategory('songs')}
-              />
-              <SidebarItem
-                icon={<Heart style={{ width: '18px', height: '18px' }} />}
-                label="Liked Songs"
-                active={selectedCategory === 'liked'}
-                count={mockLibrarySongs.filter(s => s.isLiked).length}
-                onClick={() => setSelectedCategory('liked')}
-                accentColor="#ec4899"
-              />
-              <SidebarItem
-                icon={<Clock style={{ width: '18px', height: '18px' }} />}
-                label="Recently Played"
-                active={selectedCategory === 'recent'}
-                onClick={() => setSelectedCategory('recent')}
-              />
-              <SidebarItem
-                icon={<Disc3 style={{ width: '18px', height: '18px' }} />}
-                label="Albums"
-                active={selectedCategory === 'albums'}
-                onClick={() => setSelectedCategory('albums')}
-              />
-            </div>
-          </div>
-
-          {/* Playlists */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <p style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>
-                Playlists
+            {/* Navigation */}
+            <div style={{ marginBottom: '40px' }}>
+              <p style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>
+                Browse
               </p>
-              <button style={{
-                background: 'none',
-                border: 'none',
-                color: '#9333ea',
-                fontSize: '20px',
-                cursor: 'pointer',
-                lineHeight: 1,
-              }}>+</button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <SidebarItem
+                  icon={<Music style={{ width: '18px', height: '18px' }} />}
+                  label="All Songs"
+                  active={selectedCategory === 'songs'}
+                  count={mockLibrarySongs.length}
+                  onClick={() => setSelectedCategory('songs')}
+                />
+                <SidebarItem
+                  icon={<Heart style={{ width: '18px', height: '18px' }} />}
+                  label="Liked Songs"
+                  active={selectedCategory === 'liked'}
+                  count={mockLibrarySongs.filter(s => s.isLiked).length}
+                  onClick={() => setSelectedCategory('liked')}
+                  accentColor="#ec4899"
+                />
+                <SidebarItem
+                  icon={<Clock style={{ width: '18px', height: '18px' }} />}
+                  label="Recently Played"
+                  active={selectedCategory === 'recent'}
+                  onClick={() => setSelectedCategory('recent')}
+                />
+                <SidebarItem
+                  icon={<Disc3 style={{ width: '18px', height: '18px' }} />}
+                  label="Albums"
+                  active={selectedCategory === 'albums'}
+                  onClick={() => setSelectedCategory('albums')}
+                />
+              </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <PlaylistItem label="Chill Vibes" count={12} gradient="from-cyan-500 to-blue-500" />
-              <PlaylistItem label="Workout Mix" count={8} gradient="from-orange-500 to-red-500" />
-              <PlaylistItem label="Late Night Coding" count={15} gradient="from-purple-500 to-pink-500" />
+
+            {/* Playlists */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <p style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>
+                  Playlists
+                </p>
+                <button style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#9333ea',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  lineHeight: 1,
+                }}>+</button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <PlaylistItem label="Chill Vibes" count={12} gradient="from-cyan-500 to-blue-500" />
+                <PlaylistItem label="Workout Mix" count={8} gradient="from-orange-500 to-red-500" />
+                <PlaylistItem label="Late Night Coding" count={15} gradient="from-purple-500 to-pink-500" />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Main Content */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Header */}
           <div style={{
-            padding: '32px 40px',
+            padding: isMobile ? '20px 16px' : '32px 40px',
             borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
             background: 'linear-gradient(180deg, rgba(20, 20, 25, 0.6) 0%, transparent 100%)',
           }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '24px' }}>
+            {/* Mobile Category Pills */}
+            {isMobile && (
+              <div style={{
+                display: 'flex',
+                gap: '8px',
+                marginBottom: '20px',
+                overflowX: 'auto',
+                paddingBottom: '8px',
+                WebkitOverflowScrolling: 'touch',
+              }}>
+                {[
+                  { id: 'songs', label: 'All', icon: Music },
+                  { id: 'liked', label: 'Liked', icon: Heart },
+                  { id: 'recent', label: 'Recent', icon: Clock },
+                  { id: 'albums', label: 'Albums', icon: Disc3 },
+                ].map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '10px 16px',
+                      borderRadius: '20px',
+                      border: 'none',
+                      background: selectedCategory === cat.id
+                        ? 'linear-gradient(135deg, #9333ea, #db2777)'
+                        : 'rgba(255, 255, 255, 0.08)',
+                      color: 'white',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <cat.icon style={{ width: '14px', height: '14px' }} />
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div style={{
+              display: 'flex',
+              alignItems: isMobile ? 'flex-start' : 'flex-start',
+              justifyContent: 'space-between',
+              flexDirection: isMobile ? 'column' : 'row',
+              gap: isMobile ? '16px' : '0',
+            }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                  <Sparkles style={{ width: '20px', height: '20px', color: '#a855f7' }} />
-                  <span style={{ fontSize: '13px', color: '#9ca3af', fontWeight: '500' }}>Your Collection</span>
-                </div>
+                {!isMobile && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                    <Sparkles style={{ width: '20px', height: '20px', color: '#a855f7' }} />
+                    <span style={{ fontSize: '13px', color: '#9ca3af', fontWeight: '500' }}>Your Collection</span>
+                  </div>
+                )}
                 <h1 style={{
-                  fontSize: '42px',
+                  fontSize: isMobile ? '28px' : '42px',
                   fontWeight: '800',
                   margin: 0,
                   background: selectedCategory === 'liked'
@@ -231,7 +298,7 @@ export default function Library() {
                   {selectedCategory === 'recent' && 'Recently Played'}
                   {selectedCategory === 'albums' && 'Albums'}
                 </h1>
-                <p style={{ fontSize: '15px', color: '#6b7280', marginTop: '8px' }}>
+                <p style={{ fontSize: isMobile ? '13px' : '15px', color: '#6b7280', marginTop: '8px' }}>
                   {displayedSongs.length} tracks • {Math.floor(displayedSongs.reduce((acc, s) => {
                     const [min, sec] = s.duration.split(':').map(Number)
                     return acc + min * 60 + sec
@@ -239,18 +306,24 @@ export default function Library() {
                 </p>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: isMobile ? '10px' : '16px',
+                width: isMobile ? '100%' : 'auto',
+              }}>
                 {/* Search Bar */}
                 <div style={{
                   position: 'relative',
                   transition: 'transform 0.3s ease',
                   transform: isSearchFocused ? 'scale(1.02)' : 'scale(1)',
+                  flex: isMobile ? 1 : 'none',
                 }}>
                   <div style={{
                     position: 'absolute',
                     inset: '-3px',
                     background: 'linear-gradient(135deg, #9333ea, #ec4899)',
-                    borderRadius: '16px',
+                    borderRadius: isMobile ? '12px' : '16px',
                     filter: 'blur(12px)',
                     opacity: isSearchFocused ? 0.3 : 0,
                     transition: 'opacity 0.3s ease',
@@ -261,32 +334,32 @@ export default function Library() {
                     alignItems: 'center',
                     background: 'rgba(30, 30, 35, 0.9)',
                     border: isSearchFocused ? '1px solid rgba(147, 51, 234, 0.4)' : '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '14px',
-                    padding: '0 16px',
+                    borderRadius: isMobile ? '12px' : '14px',
+                    padding: isMobile ? '0 12px' : '0 16px',
                     transition: 'all 0.3s ease',
-                    width: '280px',
+                    width: isMobile ? '100%' : '280px',
                   }}>
                     <Search style={{
-                      width: '18px',
-                      height: '18px',
+                      width: isMobile ? '16px' : '18px',
+                      height: isMobile ? '16px' : '18px',
                       color: isSearchFocused ? '#a855f7' : '#6b7280',
                       transition: 'color 0.3s ease',
                     }} />
                     <input
                       type="text"
-                      placeholder="Search your library..."
+                      placeholder={isMobile ? "Search..." : "Search your library..."}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onFocus={() => setIsSearchFocused(true)}
                       onBlur={() => setIsSearchFocused(false)}
                       style={{
                         flex: 1,
-                        padding: '14px 12px',
+                        padding: isMobile ? '12px 10px' : '14px 12px',
                         background: 'transparent',
                         border: 'none',
                         outline: 'none',
                         color: 'white',
-                        fontSize: '14px',
+                        fontSize: isMobile ? '14px' : '14px',
                       }}
                       className="placeholder-gray-500"
                     />
@@ -297,35 +370,35 @@ export default function Library() {
                 <div style={{
                   display: 'flex',
                   background: 'rgba(30, 30, 35, 0.8)',
-                  borderRadius: '12px',
+                  borderRadius: isMobile ? '10px' : '12px',
                   padding: '4px',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
                 }}>
                   <button
                     onClick={() => setViewMode('list')}
                     style={{
-                      padding: '10px 14px',
-                      borderRadius: '8px',
+                      padding: isMobile ? '8px 10px' : '10px 14px',
+                      borderRadius: isMobile ? '6px' : '8px',
                       background: viewMode === 'list' ? 'linear-gradient(135deg, #9333ea, #db2777)' : 'transparent',
                       border: 'none',
                       cursor: 'pointer',
                       transition: 'all 0.3s ease',
                     }}
                   >
-                    <List style={{ width: '18px', height: '18px', color: 'white' }} />
+                    <List style={{ width: isMobile ? '16px' : '18px', height: isMobile ? '16px' : '18px', color: 'white' }} />
                   </button>
                   <button
                     onClick={() => setViewMode('grid')}
                     style={{
-                      padding: '10px 14px',
-                      borderRadius: '8px',
+                      padding: isMobile ? '8px 10px' : '10px 14px',
+                      borderRadius: isMobile ? '6px' : '8px',
                       background: viewMode === 'grid' ? 'linear-gradient(135deg, #9333ea, #db2777)' : 'transparent',
                       border: 'none',
                       cursor: 'pointer',
                       transition: 'all 0.3s ease',
                     }}
                   >
-                    <Grid3x3 style={{ width: '18px', height: '18px', color: 'white' }} />
+                    <Grid3x3 style={{ width: isMobile ? '16px' : '18px', height: isMobile ? '16px' : '18px', color: 'white' }} />
                   </button>
                 </div>
               </div>
@@ -333,11 +406,15 @@ export default function Library() {
           </div>
 
           {/* Content Area */}
-          <div style={{ flex: 1, padding: '24px 40px', overflowY: 'auto' }}>
+          <div style={{
+            flex: 1,
+            padding: isMobile ? '16px' : '24px 40px',
+            overflowY: 'auto',
+          }}>
             {viewMode === 'list' ? (
-              <ListView songs={displayedSongs} playingId={playingId} setPlayingId={setPlayingId} />
+              <ListView songs={displayedSongs} playingId={playingId} setPlayingId={setPlayingId} isMobile={isMobile} />
             ) : (
-              <GridView songs={displayedSongs} playingId={playingId} setPlayingId={setPlayingId} />
+              <GridView songs={displayedSongs} playingId={playingId} setPlayingId={setPlayingId} isMobile={isMobile} />
             )}
           </div>
         </div>
@@ -437,30 +514,32 @@ function PlaylistItem({ label, count, gradient }: { label: string; count: number
   )
 }
 
-function ListView({ songs, playingId, setPlayingId }: { songs: typeof mockLibrarySongs; playingId: string | null; setPlayingId: (id: string | null) => void }) {
+function ListView({ songs, playingId, setPlayingId, isMobile }: { songs: typeof mockLibrarySongs; playingId: string | null; setPlayingId: (id: string | null) => void; isMobile: boolean }) {
   return (
     <div>
-      {/* Table Header */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '50px 2fr 1.5fr 1fr 80px 60px',
-        gap: '16px',
-        padding: '12px 20px',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        marginBottom: '8px',
-      }}>
-        <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>#</span>
-        <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Title</span>
-        <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Album</span>
-        <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date Added</span>
-        <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>
-          <Clock style={{ width: '14px', height: '14px' }} />
-        </span>
-        <span></span>
-      </div>
+      {/* Table Header - Desktop Only */}
+      {!isMobile && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '50px 2fr 1.5fr 1fr 80px 60px',
+          gap: '16px',
+          padding: '12px 20px',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          marginBottom: '8px',
+        }}>
+          <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>#</span>
+          <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Title</span>
+          <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Album</span>
+          <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date Added</span>
+          <span style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>
+            <Clock style={{ width: '14px', height: '14px' }} />
+          </span>
+          <span></span>
+        </div>
+      )}
 
       {/* Song Rows */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '8px' : '4px' }}>
         {songs.map((song, index) => (
           <SongRow
             key={song.id}
@@ -468,6 +547,7 @@ function ListView({ songs, playingId, setPlayingId }: { songs: typeof mockLibrar
             index={index}
             isPlaying={playingId === song.id}
             onPlay={() => setPlayingId(playingId === song.id ? null : song.id)}
+            isMobile={isMobile}
           />
         ))}
       </div>
@@ -475,10 +555,97 @@ function ListView({ songs, playingId, setPlayingId }: { songs: typeof mockLibrar
   )
 }
 
-function SongRow({ song, index, isPlaying, onPlay }: { song: typeof mockLibrarySongs[0]; index: number; isPlaying: boolean; onPlay: () => void }) {
+function SongRow({ song, index, isPlaying, onPlay, isMobile }: { song: typeof mockLibrarySongs[0]; index: number; isPlaying: boolean; onPlay: () => void; isMobile: boolean }) {
   const [isHovered, setIsHovered] = useState(false)
   const [isLiked, setIsLiked] = useState(song.isLiked)
 
+  if (isMobile) {
+    // Mobile Layout - Simplified
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '12px',
+          borderRadius: '12px',
+          background: isPlaying ? 'rgba(147, 51, 234, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+          border: isPlaying ? '1px solid rgba(147, 51, 234, 0.2)' : '1px solid transparent',
+          transition: 'all 0.3s ease',
+        }}
+        onClick={onPlay}
+      >
+        {/* Cover */}
+        <div style={{
+          width: '52px',
+          height: '52px',
+          borderRadius: '10px',
+          overflow: 'hidden',
+          position: 'relative',
+          flexShrink: 0,
+        }}>
+          <img src={song.coverUrl} alt={song.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          {isPlaying && (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <Pause style={{ width: '20px', height: '20px', color: '#a855f7', fill: '#a855f7' }} />
+            </div>
+          )}
+        </div>
+
+        {/* Info */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{
+            fontSize: '15px',
+            fontWeight: '600',
+            color: isPlaying ? '#a855f7' : 'white',
+            margin: 0,
+            marginBottom: '4px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}>{song.title}</p>
+          <p style={{
+            fontSize: '13px',
+            color: '#6b7280',
+            margin: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}>{song.artistName}</p>
+        </div>
+
+        {/* Duration & Like */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '13px', color: '#6b7280', fontFamily: 'monospace' }}>{song.duration}</span>
+          <button
+            onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '8px',
+            }}
+          >
+            <Heart style={{
+              width: '18px',
+              height: '18px',
+              color: isLiked ? '#ec4899' : '#6b7280',
+              fill: isLiked ? '#ec4899' : 'none',
+            }} />
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Desktop Layout
   return (
     <div
       style={{
@@ -611,12 +778,12 @@ function SongRow({ song, index, isPlaying, onPlay }: { song: typeof mockLibraryS
   )
 }
 
-function GridView({ songs, playingId, setPlayingId }: { songs: typeof mockLibrarySongs; playingId: string | null; setPlayingId: (id: string | null) => void }) {
+function GridView({ songs, playingId, setPlayingId, isMobile }: { songs: typeof mockLibrarySongs; playingId: string | null; setPlayingId: (id: string | null) => void; isMobile: boolean }) {
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-      gap: '24px',
+      gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(180px, 1fr))',
+      gap: isMobile ? '12px' : '24px',
     }}>
       {songs.map((song) => (
         <AlbumCard
@@ -624,13 +791,14 @@ function GridView({ songs, playingId, setPlayingId }: { songs: typeof mockLibrar
           song={song}
           isPlaying={playingId === song.id}
           onPlay={() => setPlayingId(playingId === song.id ? null : song.id)}
+          isMobile={isMobile}
         />
       ))}
     </div>
   )
 }
 
-function AlbumCard({ song, isPlaying, onPlay }: { song: typeof mockLibrarySongs[0]; isPlaying: boolean; onPlay: () => void }) {
+function AlbumCard({ song, isPlaying, onPlay, isMobile }: { song: typeof mockLibrarySongs[0]; isPlaying: boolean; onPlay: () => void; isMobile: boolean }) {
   const [isHovered, setIsHovered] = useState(false)
 
   return (
@@ -642,13 +810,14 @@ function AlbumCard({ song, isPlaying, onPlay }: { song: typeof mockLibrarySongs[
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={onPlay}
     >
       <div style={{
         position: 'relative',
         aspectRatio: '1',
-        borderRadius: '16px',
+        borderRadius: isMobile ? '12px' : '16px',
         overflow: 'hidden',
-        marginBottom: '14px',
+        marginBottom: isMobile ? '10px' : '14px',
         boxShadow: isHovered
           ? '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px rgba(147, 51, 234, 0.15)'
           : '0 4px 20px rgba(0, 0, 0, 0.3)',
@@ -671,17 +840,17 @@ function AlbumCard({ song, isPlaying, onPlay }: { song: typeof mockLibrarySongs[
           position: 'absolute',
           inset: 0,
           background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)',
-          opacity: isHovered ? 1 : 0,
+          opacity: isHovered || isMobile ? 1 : 0,
           transition: 'opacity 0.3s ease',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}>
           <button
-            onClick={onPlay}
+            onClick={(e) => { e.stopPropagation(); onPlay(); }}
             style={{
-              width: '50px',
-              height: '50px',
+              width: isMobile ? '44px' : '50px',
+              height: isMobile ? '44px' : '50px',
               borderRadius: '50%',
               background: 'linear-gradient(135deg, #9333ea, #db2777)',
               border: 'none',
@@ -695,9 +864,9 @@ function AlbumCard({ song, isPlaying, onPlay }: { song: typeof mockLibrarySongs[
             }}
           >
             {isPlaying ? (
-              <Pause style={{ width: '22px', height: '22px', color: 'white', fill: 'white' }} />
+              <Pause style={{ width: isMobile ? '18px' : '22px', height: isMobile ? '18px' : '22px', color: 'white', fill: 'white' }} />
             ) : (
-              <Play style={{ width: '22px', height: '22px', color: 'white', fill: 'white', marginLeft: '2px' }} />
+              <Play style={{ width: isMobile ? '18px' : '22px', height: isMobile ? '18px' : '22px', color: 'white', fill: 'white', marginLeft: '2px' }} />
             )}
           </button>
         </div>
@@ -730,17 +899,17 @@ function AlbumCard({ song, isPlaying, onPlay }: { song: typeof mockLibrarySongs[
       </div>
 
       <h3 style={{
-        fontSize: '15px',
+        fontSize: isMobile ? '14px' : '15px',
         fontWeight: '600',
         color: isPlaying ? '#a855f7' : 'white',
         margin: 0,
-        marginBottom: '6px',
+        marginBottom: '4px',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
       }}>{song.title}</h3>
       <p style={{
-        fontSize: '13px',
+        fontSize: isMobile ? '12px' : '13px',
         color: '#6b7280',
         margin: 0,
         overflow: 'hidden',

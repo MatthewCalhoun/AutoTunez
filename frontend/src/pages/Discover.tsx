@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Play, Heart, Coins, Crown, TrendingUp, Search, Headphones, ChevronRight, Music2, Zap, Sparkles } from 'lucide-react'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 // Mock data
 const mockSongs = [
@@ -110,6 +111,7 @@ export default function Discover() {
   const [sortBy, setSortBy] = useState<'trending' | 'new' | 'top'>('trending')
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const isMobile = useIsMobile()
 
   const filteredSongs = mockSongs.filter(song => {
     const matchesGenre = selectedGenre === 'All' || song.genre === selectedGenre
@@ -119,23 +121,62 @@ export default function Discover() {
   })
 
   return (
-    <div className="min-h-screen pb-32 relative overflow-hidden w-full">
+    <div style={{
+      minHeight: '100vh',
+      paddingBottom: isMobile ? '120px' : '128px',
+      position: 'relative',
+      overflow: 'hidden',
+      width: '100%',
+    }}>
       {/* Animated Background */}
-      <div className="fixed inset-0 -z-10">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[128px] animate-pulse-slow" />
-        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-fuchsia-600/15 rounded-full blur-[128px] animate-pulse-slow animation-delay-2000" />
-        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[128px] animate-pulse-slow animation-delay-4000" />
+      <div style={{ position: 'fixed', inset: 0, zIndex: -10, pointerEvents: 'none' }}>
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: '25%',
+          width: isMobile ? '300px' : '600px',
+          height: isMobile ? '300px' : '600px',
+          background: 'radial-gradient(circle, rgba(147, 51, 234, 0.2) 0%, transparent 70%)',
+          borderRadius: '50%',
+          filter: 'blur(128px)',
+        }} className="animate-pulse-slow" />
+        <div style={{
+          position: 'absolute',
+          bottom: '25%',
+          right: '25%',
+          width: isMobile ? '250px' : '500px',
+          height: isMobile ? '250px' : '500px',
+          background: 'radial-gradient(circle, rgba(219, 39, 119, 0.15) 0%, transparent 70%)',
+          borderRadius: '50%',
+          filter: 'blur(128px)',
+        }} className="animate-pulse-slow animation-delay-2000" />
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          width: isMobile ? '200px' : '400px',
+          height: isMobile ? '200px' : '400px',
+          background: 'radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%)',
+          borderRadius: '50%',
+          filter: 'blur(128px)',
+        }} className="animate-pulse-slow animation-delay-4000" />
       </div>
 
 
       {/* Search & Filter Section */}
-      <section className="px-4 mb-12 w-full flex justify-center" style={{ paddingTop: '100px' }}>
-        <div className="w-full" style={{ maxWidth: '1400px' }}>
+      <section style={{
+        padding: isMobile ? '24px 16px 0' : '100px 16px 0',
+        marginBottom: isMobile ? '24px' : '48px',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+      }}>
+        <div style={{ width: '100%', maxWidth: '1400px' }}>
           {/* Search Bar */}
           <div
             style={{
               position: 'relative',
-              marginBottom: '32px',
+              marginBottom: isMobile ? '24px' : '32px',
               transition: 'transform 0.3s ease',
               transform: isSearchFocused ? 'scale(1.01)' : 'scale(1)',
             }}
@@ -146,7 +187,7 @@ export default function Discover() {
                 position: 'absolute',
                 inset: '-4px',
                 background: 'linear-gradient(135deg, #9333ea, #ec4899, #8b5cf6)',
-                borderRadius: '24px',
+                borderRadius: isMobile ? '16px' : '24px',
                 filter: 'blur(20px)',
                 opacity: isSearchFocused ? 0.4 : 0,
                 transition: 'opacity 0.4s ease',
@@ -160,7 +201,7 @@ export default function Discover() {
                 alignItems: 'center',
                 background: 'linear-gradient(135deg, rgba(30, 30, 40, 0.9), rgba(20, 20, 30, 0.95))',
                 border: isSearchFocused ? '1px solid rgba(147, 51, 234, 0.5)' : '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '20px',
+                borderRadius: isMobile ? '16px' : '20px',
                 overflow: 'hidden',
                 backdropFilter: 'blur(20px)',
                 boxShadow: isSearchFocused
@@ -171,15 +212,15 @@ export default function Discover() {
               }}
             >
               <div style={{
-                padding: '20px 24px',
+                padding: isMobile ? '16px' : '20px 24px',
                 display: 'flex',
                 alignItems: 'center',
                 borderRight: '1px solid rgba(255,255,255,0.05)',
               }}>
                 <Search
                   style={{
-                    width: '24px',
-                    height: '24px',
+                    width: isMobile ? '20px' : '24px',
+                    height: isMobile ? '20px' : '24px',
                     color: isSearchFocused ? '#a855f7' : '#6b7280',
                     transition: 'color 0.3s ease',
                   }}
@@ -187,66 +228,78 @@ export default function Discover() {
               </div>
               <input
                 type="text"
-                placeholder="Search tracks, artists, or vibes..."
+                placeholder={isMobile ? "Search tracks..." : "Search tracks, artists, or vibes..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setIsSearchFocused(false)}
                 style={{
                   flex: 1,
-                  padding: '22px 20px',
+                  padding: isMobile ? '16px 12px' : '22px 20px',
                   background: 'transparent',
                   color: 'white',
-                  fontSize: '17px',
+                  fontSize: isMobile ? '16px' : '17px',
                   fontWeight: '400',
                   border: 'none',
                   outline: 'none',
                 }}
                 className="placeholder-gray-500"
               />
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                paddingRight: '20px',
-              }}>
-                <kbd style={{
-                  padding: '8px 14px',
-                  borderRadius: '10px',
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  color: '#9ca3af',
-                  fontSize: '13px',
-                  fontFamily: 'monospace',
-                  fontWeight: '500',
-                }}>⌘K</kbd>
-              </div>
+              {!isMobile && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  paddingRight: '20px',
+                }}>
+                  <kbd style={{
+                    padding: '8px 14px',
+                    borderRadius: '10px',
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: '#9ca3af',
+                    fontSize: '13px',
+                    fontFamily: 'monospace',
+                    fontWeight: '500',
+                  }}>⌘K</kbd>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Genre Pills */}
-          <div style={{ marginBottom: '60px', marginTop: '40px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-              <Music2 className="w-6 h-6 text-purple-400" />
-              <h3 style={{ fontSize: '24px', fontWeight: '600', color: 'white', margin: 0 }}>Browse by Genre</h3>
+          <div style={{ marginBottom: isMobile ? '24px' : '60px', marginTop: isMobile ? '20px' : '40px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '16px', marginBottom: isMobile ? '16px' : '24px' }}>
+              <Music2 style={{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px', color: '#a855f7' }} />
+              <h3 style={{ fontSize: isMobile ? '18px' : '24px', fontWeight: '600', color: 'white', margin: 0 }}>Browse by Genre</h3>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{
+              display: 'flex',
+              flexWrap: isMobile ? 'nowrap' : 'wrap',
+              gap: isMobile ? '10px' : '16px',
+              overflowX: isMobile ? 'auto' : 'visible',
+              paddingBottom: isMobile ? '8px' : '0',
+              WebkitOverflowScrolling: 'touch',
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none',
+            }}>
               {genres.map(genre => (
                 <button
                   key={genre}
                   onClick={() => setSelectedGenre(genre)}
                   style={{
                     position: 'relative',
-                    padding: '14px 28px',
-                    borderRadius: '16px',
+                    padding: isMobile ? '10px 18px' : '14px 28px',
+                    borderRadius: isMobile ? '12px' : '16px',
                     fontWeight: '500',
-                    fontSize: '16px',
+                    fontSize: isMobile ? '14px' : '16px',
                     transition: 'all 0.3s ease',
                     border: selectedGenre === genre ? 'none' : '1px solid rgba(255,255,255,0.1)',
                     background: selectedGenre === genre ? undefined : 'rgba(255,255,255,0.05)',
                     color: selectedGenre === genre ? 'white' : '#9ca3af',
                     cursor: 'pointer',
                     overflow: 'hidden',
+                    flexShrink: 0,
                   }}
                   className={selectedGenre === genre ? 'shadow-lg' : 'hover:text-white hover:border-white/20'}
                 >
@@ -260,26 +313,40 @@ export default function Discover() {
           </div>
 
           {/* Sort Options */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '20px', marginBottom: '80px' }}>
-            <span style={{ color: '#6b7280', fontSize: '16px' }}>Sort by:</span>
-            <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: isMobile ? '12px' : '20px',
+            marginBottom: isMobile ? '32px' : '80px',
+          }}>
+            <span style={{ color: '#6b7280', fontSize: isMobile ? '14px' : '16px' }}>Sort by:</span>
+            <div style={{
+              display: 'flex',
+              gap: isMobile ? '8px' : '12px',
+              overflowX: isMobile ? 'auto' : 'visible',
+              WebkitOverflowScrolling: 'touch',
+            }}>
               <SortButton
-                icon={<TrendingUp className="h-5 w-5" />}
+                icon={<TrendingUp style={{ width: isMobile ? '16px' : '20px', height: isMobile ? '16px' : '20px' }} />}
                 label="Trending"
                 active={sortBy === 'trending'}
                 onClick={() => setSortBy('trending')}
+                isMobile={isMobile}
               />
               <SortButton
-                icon={<Zap className="h-5 w-5" />}
+                icon={<Zap style={{ width: isMobile ? '16px' : '20px', height: isMobile ? '16px' : '20px' }} />}
                 label="New"
                 active={sortBy === 'new'}
                 onClick={() => setSortBy('new')}
+                isMobile={isMobile}
               />
               <SortButton
-                icon={<Coins className="h-5 w-5" />}
-                label="Top Earning"
+                icon={<Coins style={{ width: isMobile ? '16px' : '20px', height: isMobile ? '16px' : '20px' }} />}
+                label={isMobile ? "Top" : "Top Earning"}
                 active={sortBy === 'top'}
                 onClick={() => setSortBy('top')}
+                isMobile={isMobile}
               />
             </div>
           </div>
@@ -287,66 +354,117 @@ export default function Discover() {
       </section>
 
       {/* Songs Grid */}
-      <section className="px-4 pt-8 w-full flex justify-center">
-        <div className="w-full" style={{ maxWidth: '1400px' }}>
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-2xl font-bold text-white flex items-center gap-3">
-              <span className="w-1 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
+      <section style={{ padding: isMobile ? '0 16px' : '32px 16px', width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ width: '100%', maxWidth: '1400px' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: isMobile ? '16px' : '32px',
+          }}>
+            <h3 style={{
+              fontSize: isMobile ? '20px' : '24px',
+              fontWeight: '700',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              margin: 0,
+            }}>
+              <span style={{
+                width: '4px',
+                height: isMobile ? '24px' : '32px',
+                background: 'linear-gradient(to bottom, #a855f7, #ec4899)',
+                borderRadius: '4px',
+              }} />
               All Tracks
             </h3>
-            <span className="text-gray-500">{filteredSongs.length} tracks</span>
+            <span style={{ color: '#6b7280', fontSize: isMobile ? '14px' : '16px' }}>{filteredSongs.length} tracks</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile
+              ? 'repeat(2, 1fr)'
+              : 'repeat(auto-fill, minmax(220px, 1fr))',
+            gap: isMobile ? '12px' : '16px',
+          }}>
             {filteredSongs.map((song, index) => (
-              <SongCard key={song.id} song={song} delay={index * 100} />
+              <SongCard key={song.id} song={song} delay={index * 100} isMobile={isMobile} />
             ))}
           </div>
 
           {filteredSongs.length === 0 && (
-            <div className="text-center py-20">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/5 mb-6">
-                <Music2 className="w-10 h-10 text-gray-600" />
+            <div style={{ textAlign: 'center', padding: isMobile ? '48px 0' : '80px 0' }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: isMobile ? '60px' : '80px',
+                height: isMobile ? '60px' : '80px',
+                borderRadius: '50%',
+                background: 'rgba(255, 255, 255, 0.05)',
+                marginBottom: '24px',
+              }}>
+                <Music2 style={{ width: isMobile ? '30px' : '40px', height: isMobile ? '30px' : '40px', color: '#4b5563' }} />
               </div>
-              <p className="text-gray-500 text-lg mb-2">No tracks found</p>
-              <p className="text-gray-600">Try adjusting your search or filters</p>
+              <p style={{ color: '#6b7280', fontSize: isMobile ? '16px' : '18px', marginBottom: '8px' }}>No tracks found</p>
+              <p style={{ color: '#4b5563', fontSize: isMobile ? '14px' : '16px' }}>Try adjusting your search or filters</p>
             </div>
           )}
         </div>
       </section>
 
       {/* Floating CTA */}
-      <div className="fixed bottom-24 right-6 z-40">
+      <div style={{
+        position: 'fixed',
+        bottom: isMobile ? '100px' : '96px',
+        right: isMobile ? '16px' : '24px',
+        zIndex: 40,
+      }}>
         <Link
           to="/create"
-          className="group flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl font-semibold text-white shadow-2xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all hover:scale-105"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: isMobile ? '8px' : '12px',
+            padding: isMobile ? '12px 16px' : '16px 24px',
+            background: 'linear-gradient(135deg, #9333ea, #db2777)',
+            borderRadius: isMobile ? '14px' : '16px',
+            fontWeight: '600',
+            color: 'white',
+            textDecoration: 'none',
+            boxShadow: '0 8px 32px rgba(147, 51, 234, 0.4)',
+            fontSize: isMobile ? '14px' : '16px',
+          }}
         >
-          <Sparkles className="w-5 h-5" />
-          <span className="hidden sm:inline">Create Music</span>
-          <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          <Sparkles style={{ width: isMobile ? '18px' : '20px', height: isMobile ? '18px' : '20px' }} />
+          {!isMobile && <span>Create Music</span>}
+          <ChevronRight style={{ width: isMobile ? '18px' : '20px', height: isMobile ? '18px' : '20px' }} />
         </Link>
       </div>
     </div>
   )
 }
 
-function SortButton({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
+function SortButton({ icon, label, active, onClick, isMobile }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void; isMobile: boolean }) {
   return (
     <button
       onClick={onClick}
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '10px',
-        padding: '12px 24px',
-        borderRadius: '14px',
+        gap: isMobile ? '6px' : '10px',
+        padding: isMobile ? '10px 14px' : '12px 24px',
+        borderRadius: isMobile ? '10px' : '14px',
         fontWeight: '500',
-        fontSize: '15px',
+        fontSize: isMobile ? '13px' : '15px',
         transition: 'all 0.3s ease',
         background: active ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
         color: active ? '#c084fc' : '#6b7280',
         border: active ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid transparent',
         cursor: 'pointer',
+        flexShrink: 0,
       }}
       className={active ? '' : 'hover:text-gray-300 hover:bg-white/5'}
     >
@@ -356,18 +474,19 @@ function SortButton({ icon, label, active, onClick }: { icon: React.ReactNode; l
   )
 }
 
-function SongCard({ song, delay }: { song: typeof mockSongs[0]; delay: number }) {
+function SongCard({ song, delay, isMobile }: { song: typeof mockSongs[0]; delay: number; isMobile: boolean }) {
   const [isLiked, setIsLiked] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   return (
     <Link
       to={`/song/${song.id}`}
-      className="group block"
       style={{
+        display: 'block',
         animationDelay: `${delay}ms`,
         animation: 'fadeIn 0.6s ease-out forwards',
         opacity: 0,
+        textDecoration: 'none',
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -375,7 +494,7 @@ function SongCard({ song, delay }: { song: typeof mockSongs[0]; delay: number })
       <div
         style={{
           position: 'relative',
-          borderRadius: '16px',
+          borderRadius: isMobile ? '12px' : '16px',
           overflow: 'hidden',
           background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.9), rgba(15, 15, 20, 0.95))',
           border: isHovered ? '1px solid rgba(147, 51, 234, 0.3)' : '1px solid rgba(255, 255, 255, 0.08)',
@@ -423,8 +542,8 @@ function SongCard({ song, delay }: { song: typeof mockSongs[0]; delay: number })
           >
             <div
               style={{
-                width: '44px',
-                height: '44px',
+                width: isMobile ? '36px' : '44px',
+                height: isMobile ? '36px' : '44px',
                 borderRadius: '50%',
                 background: 'white',
                 display: 'flex',
@@ -435,12 +554,12 @@ function SongCard({ song, delay }: { song: typeof mockSongs[0]; delay: number })
                 transition: 'transform 0.3s ease',
               }}
             >
-              <Play style={{ width: '18px', height: '18px', color: '#111', marginLeft: '2px' }} fill="currentColor" />
+              <Play style={{ width: isMobile ? '14px' : '18px', height: isMobile ? '14px' : '18px', color: '#111', marginLeft: '2px' }} fill="currentColor" />
             </div>
           </div>
 
           {/* Top Badges Row */}
-          <div style={{ position: 'absolute', top: '10px', left: '10px', right: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div style={{ position: 'absolute', top: isMobile ? '8px' : '10px', left: isMobile ? '8px' : '10px', right: isMobile ? '8px' : '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             {/* Like Button */}
             <button
               onClick={(e) => {
@@ -448,7 +567,7 @@ function SongCard({ song, delay }: { song: typeof mockSongs[0]; delay: number })
                 setIsLiked(!isLiked)
               }}
               style={{
-                padding: '10px',
+                padding: isMobile ? '8px' : '10px',
                 borderRadius: '50%',
                 background: isLiked
                   ? 'linear-gradient(135deg, #ec4899, #f43f5e)'
@@ -467,8 +586,8 @@ function SongCard({ song, delay }: { song: typeof mockSongs[0]; delay: number })
             >
               <Heart
                 style={{
-                  width: '16px',
-                  height: '16px',
+                  width: isMobile ? '14px' : '16px',
+                  height: isMobile ? '14px' : '16px',
                   color: 'white',
                   fill: isLiked ? 'white' : 'none',
                   strokeWidth: isLiked ? 0 : 2,
@@ -484,60 +603,61 @@ function SongCard({ song, delay }: { song: typeof mockSongs[0]; delay: number })
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
-                  padding: '5px 10px',
+                  padding: isMobile ? '4px 8px' : '5px 10px',
                   borderRadius: '20px',
                   background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
                   color: 'white',
-                  fontSize: '10px',
+                  fontSize: isMobile ? '9px' : '10px',
                   fontWeight: '700',
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px',
                   boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)',
                 }}
               >
-                <Crown style={{ width: '10px', height: '10px' }} />
-                Exclusive
+                <Crown style={{ width: isMobile ? '8px' : '10px', height: isMobile ? '8px' : '10px' }} />
+                {!isMobile && 'Exclusive'}
               </div>
             )}
           </div>
 
-          {/* Price Tag - Top Right Corner */}
+          {/* Price Tag */}
           <div
             style={{
               position: 'absolute',
-              bottom: '10px',
-              right: '10px',
+              bottom: isMobile ? '8px' : '10px',
+              right: isMobile ? '8px' : '10px',
               background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.9), rgba(219, 39, 119, 0.9))',
-              padding: '6px 12px',
-              borderRadius: '10px',
+              padding: isMobile ? '4px 8px' : '6px 12px',
+              borderRadius: isMobile ? '8px' : '10px',
               backdropFilter: 'blur(10px)',
               boxShadow: '0 4px 12px rgba(147, 51, 234, 0.3)',
             }}
           >
-            <span style={{ color: 'white', fontSize: '13px', fontWeight: '700' }}>
+            <span style={{ color: 'white', fontSize: isMobile ? '11px' : '13px', fontWeight: '700' }}>
               ${song.streamPrice}
             </span>
           </div>
         </div>
 
         {/* Card Content */}
-        <div style={{ padding: '14px' }}>
+        <div style={{ padding: isMobile ? '10px' : '14px' }}>
           {/* Title & Artist */}
-          <div style={{ marginBottom: '12px' }}>
+          <div style={{ marginBottom: isMobile ? '8px' : '12px' }}>
             <h3
               style={{
-                fontSize: '14px',
+                fontSize: isMobile ? '13px' : '14px',
                 fontWeight: '600',
                 color: 'white',
-                marginBottom: '4px',
+                marginBottom: '2px',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
+                margin: 0,
               }}
             >
               {song.title}
             </h3>
-            <p style={{ fontSize: '12px', color: '#9ca3af' }}>{song.artistName}</p>
+            <p style={{ fontSize: isMobile ? '11px' : '12px', color: '#9ca3af', margin: 0 }}>{song.artistName}</p>
           </div>
 
           {/* Genre & Stats Row */}
@@ -545,9 +665,9 @@ function SongCard({ song, delay }: { song: typeof mockSongs[0]; delay: number })
             <span
               className={`bg-gradient-to-r ${genreColors[song.genre] || genreColors['All']}`}
               style={{
-                padding: '4px 10px',
+                padding: isMobile ? '3px 8px' : '4px 10px',
                 borderRadius: '8px',
-                fontSize: '10px',
+                fontSize: isMobile ? '9px' : '10px',
                 fontWeight: '600',
                 color: 'white',
                 textTransform: 'uppercase',
@@ -556,17 +676,17 @@ function SongCard({ song, delay }: { song: typeof mockSongs[0]; delay: number })
             >
               {song.genre}
             </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '11px', color: '#6b7280' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Headphones style={{ width: '12px', height: '12px' }} />
-                {song.totalStreams.toLocaleString()}
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '10px', fontSize: isMobile ? '10px' : '11px', color: '#6b7280' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                <Headphones style={{ width: isMobile ? '10px' : '12px', height: isMobile ? '10px' : '12px' }} />
+                {isMobile ? (song.totalStreams >= 1000 ? `${(song.totalStreams/1000).toFixed(1)}k` : song.totalStreams) : song.totalStreams.toLocaleString()}
               </span>
-              <span>{song.duration}</span>
+              {!isMobile && <span>{song.duration}</span>}
             </div>
           </div>
 
-          {/* Exclusive Price */}
-          {song.isExclusive && song.exclusivePrice && (
+          {/* Exclusive Price - Hidden on mobile for compactness */}
+          {!isMobile && song.isExclusive && song.exclusivePrice && (
             <div
               style={{
                 marginTop: '12px',
