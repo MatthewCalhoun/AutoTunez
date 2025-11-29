@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Play, Heart, Coins, Crown, TrendingUp, Search, Headphones, ChevronRight, Music2, Zap, Sparkles } from 'lucide-react'
+import { Play, Heart, Coins, Crown, TrendingUp, Search, Headphones, ChevronRight, Music2, Zap, Sparkles, User, Loader2 } from 'lucide-react'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { searchUsersByUsername } from '../lib/identityResolver'
+import type { ResolvedIdentity } from '../lib/identityResolver'
 
 // Mock data
 const mockSongs = [
@@ -111,12 +113,63 @@ export default function Discover() {
   const [sortBy, setSortBy] = useState<'trending' | 'new' | 'top'>('trending')
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [userResults, setUserResults] = useState<ResolvedIdentity[]>([])
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false)
+  const [showUserDropdown, setShowUserDropdown] = useState(false)
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
+
+  // Search for users when query changes (debounced)
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    if (searchQuery.length >= 2) {
+      setIsSearchingUsers(true)
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const results = await searchUsersByUsername(searchQuery)
+          setUserResults(results)
+          setShowUserDropdown(results.length > 0 || isSearchFocused)
+        } catch (error) {
+          console.error('User search error:', error)
+          setUserResults([])
+        } finally {
+          setIsSearchingUsers(false)
+        }
+      }, 300) // 300ms debounce
+    } else {
+      setUserResults([])
+      setShowUserDropdown(false)
+      setIsSearchingUsers(false)
+    }
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+    }
+  }, [searchQuery, isSearchFocused])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowUserDropdown(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const filteredSongs = mockSongs.filter(song => {
     const matchesGenre = selectedGenre === 'All' || song.genre === selectedGenre
     const matchesSearch = song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         song.artist.toLowerCase().includes(searchQuery.toLowerCase())
+                         song.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (song.artistName?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
     return matchesGenre && matchesSearch
   })
 
@@ -174,11 +227,13 @@ export default function Discover() {
         <div style={{ width: '100%', maxWidth: '1400px' }}>
           {/* Search Bar */}
           <div
+            ref={dropdownRef}
             style={{
               position: 'relative',
               marginBottom: isMobile ? '24px' : '32px',
               transition: 'transform 0.3s ease',
               transform: isSearchFocused ? 'scale(1.01)' : 'scale(1)',
+              zIndex: showUserDropdown ? 9999 : 1,
             }}
           >
             {/* Glow Effect */}
@@ -228,11 +283,17 @@ export default function Discover() {
               </div>
               <input
                 type="text"
-                placeholder={isMobile ? "Search tracks..." : "Search tracks, artists, or vibes..."}
+                placeholder={isMobile ? "Search tracks or users..." : "Search tracks, artists, or users..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
+                onFocus={() => {
+                  setIsSearchFocused(true)
+                  if (userResults.length > 0) setShowUserDropdown(true)
+                }}
+                onBlur={() => {
+                  // Delay hiding to allow clicking dropdown items
+                  setTimeout(() => setIsSearchFocused(false), 150)
+                }}
                 style={{
                   flex: 1,
                   padding: isMobile ? '16px 12px' : '22px 20px',
@@ -245,7 +306,23 @@ export default function Discover() {
                 }}
                 className="placeholder-gray-500"
               />
-              {!isMobile && (
+              {isSearchingUsers && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  paddingRight: '16px',
+                }}>
+                  <Loader2
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      color: '#a855f7',
+                      animation: 'spin 1s linear infinite',
+                    }}
+                  />
+                </div>
+              )}
+              {!isMobile && !isSearchingUsers && (
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -265,6 +342,124 @@ export default function Discover() {
                 </div>
               )}
             </div>
+
+            {/* User Search Results Dropdown */}
+            {showUserDropdown && userResults.length > 0 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  marginTop: '8px',
+                  background: '#121218',
+                  border: '2px solid #9333ea',
+                  borderRadius: isMobile ? '12px' : '16px',
+                  boxShadow: '0 25px 50px rgba(0, 0, 0, 0.95), 0 0 100px rgba(147, 51, 234, 0.4)',
+                  zIndex: 9999,
+                  overflow: 'hidden',
+                }}
+              >
+                <div style={{
+                  padding: isMobile ? '12px 16px' : '16px 20px',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  background: 'rgba(147, 51, 234, 0.1)',
+                }}>
+                  <User style={{ width: '18px', height: '18px', color: '#a855f7' }} />
+                  <span style={{ color: '#e5e7eb', fontSize: '14px', fontWeight: '600', letterSpacing: '0.5px' }}>Artists</span>
+                </div>
+                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                  {userResults.map((user) => (
+                    <Link
+                      key={user.identityKey}
+                      to={`/user/${encodeURIComponent(user.identityKey)}`}
+                      onClick={() => {
+                        setShowUserDropdown(false)
+                        setSearchQuery('')
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: isMobile ? '12px' : '16px',
+                        padding: isMobile ? '14px 16px' : '16px 20px',
+                        textDecoration: 'none',
+                        transition: 'background 0.2s ease',
+                        cursor: 'pointer',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(147, 51, 234, 0.2)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent'
+                      }}
+                    >
+                      {/* Avatar */}
+                      <div
+                        style={{
+                          width: isMobile ? '44px' : '52px',
+                          height: isMobile ? '44px' : '52px',
+                          borderRadius: '50%',
+                          background: user.avatarURL
+                            ? `url(${user.avatarURL}) center/cover`
+                            : 'linear-gradient(135deg, #9333ea, #db2777)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          border: '3px solid rgba(147, 51, 234, 0.4)',
+                          boxShadow: '0 4px 12px rgba(147, 51, 234, 0.3)',
+                        }}
+                      >
+                        {!user.avatarURL && (
+                          <User style={{ width: '22px', height: '22px', color: 'white' }} />
+                        )}
+                      </div>
+                      {/* User Info */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          color: 'white',
+                          fontSize: isMobile ? '15px' : '17px',
+                          fontWeight: '600',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          marginBottom: '4px',
+                        }}>
+                          {user.name}
+                        </div>
+                        <div style={{
+                          color: '#9ca3af',
+                          fontSize: isMobile ? '12px' : '13px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          fontFamily: 'monospace',
+                        }}>
+                          {user.identityKey.slice(0, 8)}...{user.identityKey.slice(-6)}
+                        </div>
+                      </div>
+                      {/* Arrow */}
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        background: 'rgba(147, 51, 234, 0.2)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        <ChevronRight style={{ width: '18px', height: '18px', color: '#a855f7' }} />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Genre Pills */}

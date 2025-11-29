@@ -5,6 +5,7 @@ import { useIsMobile } from '../hooks/useIsMobile'
 import { useWallet } from '../contexts/WalletContext'
 import { abbreviateIdentityKey } from '../lib/identity'
 import { walletClient } from '../lib/walletClient'
+import { cacheIdentity } from '../lib/identityResolver'
 
 // Helper to decode base64 to byte array
 function base64ToBytes(base64: string): number[] {
@@ -294,6 +295,14 @@ export default function Profile() {
                 const identity = { name: userName, avatarURL }
                 setSocialCertIdentity(identity)
                 localStorage.setItem(`socialcert_${key}`, JSON.stringify(identity))
+                // Cache for search
+                cacheIdentity({
+                  name: userName,
+                  avatarURL,
+                  identityKey: key,
+                  certifier: cert.certifier || 'unknown',
+                  certificateType: cert.type || 'unknown'
+                })
                 return
               }
             }
@@ -354,6 +363,14 @@ export default function Profile() {
               const identity = { name: userName, avatarURL }
               setSocialCertIdentity(identity)
               localStorage.setItem(`socialcert_${key}`, JSON.stringify(identity))
+              // Cache for search
+              cacheIdentity({
+                name: userName,
+                avatarURL,
+                identityKey: key,
+                certifier: cert.certifier || 'unknown',
+                certificateType: cert.type || 'unknown'
+              })
               return
             }
           }
@@ -380,6 +397,14 @@ export default function Profile() {
           }
           setSocialCertIdentity(identity)
           localStorage.setItem(`socialcert_${key}`, JSON.stringify(identity))
+          // Cache for search
+          cacheIdentity({
+            name: socialCert.name,
+            avatarURL: socialCert.avatarURL || null,
+            identityKey: key,
+            certifier: 'socialcert',
+            certificateType: 'identity'
+          })
           return
         }
       } catch (e) {
@@ -404,6 +429,14 @@ export default function Profile() {
               const identity = { name, avatarURL: avatarURL || null }
               setSocialCertIdentity(identity)
               localStorage.setItem(`socialcert_${key}`, JSON.stringify(identity))
+              // Cache for search
+              cacheIdentity({
+                name,
+                avatarURL: avatarURL || null,
+                identityKey: key,
+                certifier: 'discovered',
+                certificateType: 'identity'
+              })
               return
             }
           }

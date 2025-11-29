@@ -6,6 +6,7 @@ import Library from './pages/Library'
 import SongDetail from './pages/SongDetail'
 import CreateDashboard from './pages/CreateDashboard'
 import Profile from './pages/Profile'
+import UserProfile from './pages/UserProfile'
 import { WalletProvider } from './contexts/WalletContext'
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
             <Route path="/song/:id" element={<SongDetail />} />
             <Route path="/create" element={<CreateDashboard />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/user/:identityKey" element={<UserProfile />} />
           </Routes>
         </div>
       </Router>
