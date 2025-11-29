@@ -1,3 +1,5 @@
 import { WalletClient } from '@bsv/sdk'
 
-export const walletClient = new WalletClient()
+// Use XDM substrate which uses cross-domain messaging via iframe
+// This is what Thryll uses to communicate with MetaNet Client
+export const walletClient = new WalletClient('xdm')

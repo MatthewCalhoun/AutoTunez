@@ -1,17 +1,433 @@
-import { useState } from 'react'
-import { Wallet, Copy, Check, Music, DollarSign, Heart, LogOut, TrendingUp, Play, Clock, Settings, Bell, Eye, Shield, Zap, Loader2 } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Wallet, Copy, Check, Music, DollarSign, Heart, LogOut, TrendingUp, Play, Clock, Settings, Bell, Eye, Shield, Zap, Loader2, User, RefreshCw } from 'lucide-react'
+import { IdentityClient, Utils } from '@bsv/sdk'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useWallet } from '../contexts/WalletContext'
+import { abbreviateIdentityKey } from '../lib/identity'
+import { walletClient } from '../lib/walletClient'
+
+// Helper to decode base64 to byte array
+function base64ToBytes(base64: string): number[] {
+  const binary = atob(base64)
+  const bytes: number[] = []
+  for (let i = 0; i < binary.length; i++) {
+    bytes.push(binary.charCodeAt(i))
+  }
+  return bytes
+}
+
+// Decrypt a field value using a revelation key (AES-256-GCM)
+// Per BRC-52: "The 256-bit initialization vector used is prepended to the beginning of the data"
+async function decryptFieldWithKey(encryptedValue: string, revelationKeyBase64: string): Promise<string | null> {
+  // Decode the revelation key (256-bit AES key)
+  const keyBytes = base64ToBytes(revelationKeyBase64)
+
+  // Decode the encrypted value (IV prepended to ciphertext)
+  const encryptedBytes = base64ToBytes(encryptedValue)
+
+  // Try different IV sizes - BRC-52 says 256-bit (32 bytes) but some use 12 bytes for GCM
+  const ivSizes = [32, 16, 12]
+
+  for (const ivSize of ivSizes) {
+    if (encryptedBytes.length <= ivSize) continue
+
+    try {
+      const iv = new Uint8Array(encryptedBytes.slice(0, ivSize))
+      const ciphertext = new Uint8Array(encryptedBytes.slice(ivSize))
+
+      // Import the key for AES-GCM
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        new Uint8Array(keyBytes),
+        { name: 'AES-GCM' },
+        false,
+        ['decrypt']
+      )
+
+      // Decrypt
+      const decrypted = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv },
+        cryptoKey,
+        ciphertext
+      )
+
+      const result = new TextDecoder().decode(decrypted)
+      console.log(`[Profile] Successfully decrypted field with IV size ${ivSize}:`, result)
+      return result
+    } catch {
+      // Try next IV size
+    }
+  }
+
+  console.warn('[Profile] Failed to decrypt with revelation key - tried all IV sizes')
+  return null
+}
+
+// Try to decrypt revelation key from keyring using wallet
+async function decryptRevelationKey(
+  encryptedKey: string,
+  fieldName: string,
+  serialNumber: string,
+  certifier: string
+): Promise<string | null> {
+  const protocolID: [number, string] = [2, 'certificate field encryption']
+  const ciphertext = base64ToBytes(encryptedKey)
+
+  // Try different keyID formats for revelation key decryption
+  const keyIDFormats = [
+    `${serialNumber} ${fieldName}`,  // Revelation key format
+    fieldName,
+  ]
+
+  for (const keyID of keyIDFormats) {
+    try {
+      console.log(`[Profile] Trying to decrypt revelation key for "${fieldName}" with keyID: "${keyID}"`)
+
+      const result = await walletClient.decrypt({
+        ciphertext,
+        protocolID,
+        keyID,
+        counterparty: certifier,
+        privilegedReason: 'Display your identity on your profile'
+      })
+
+      // Convert to base64 string for use as AES key
+      const keyBase64 = btoa(String.fromCharCode(...result.plaintext))
+      console.log(`[Profile] Successfully decrypted revelation key for "${fieldName}"`)
+      return keyBase64
+    } catch {
+      // Try next format
+    }
+  }
+
+  return null
+}
+
+// Helper to decrypt a certificate field using the wallet
+async function decryptCertificateField(
+  encryptedValue: string,
+  fieldName: string,
+  serialNumber: string,
+  certifier: string
+): Promise<string | null> {
+  // Get the encryption parameters for this field
+  const protocolID: [number, string] = [2, 'certificate field encryption']
+
+  // Decode the base64 encrypted value
+  const ciphertext = base64ToBytes(encryptedValue)
+
+  // Try multiple keyID formats - the original encryption may have used just fieldName
+  const keyIDFormats = [
+    fieldName,                           // Original master certificate encryption uses just fieldName
+    `${serialNumber} ${fieldName}`,      // Verifiable certificate format
+  ]
+
+  for (const keyID of keyIDFormats) {
+    try {
+      console.log(`[Profile] Trying to decrypt field "${fieldName}" with keyID: "${keyID}"`)
+
+      // Decrypt using the wallet with certifier as counterparty
+      const result = await walletClient.decrypt({
+        ciphertext,
+        protocolID,
+        keyID,
+        counterparty: certifier,
+        privilegedReason: 'Display your identity on your profile'
+      })
+
+      // Convert decrypted bytes to UTF-8 string
+      const decrypted = Utils.toUTF8(result.plaintext)
+      console.log(`[Profile] Successfully decrypted "${fieldName}":`, decrypted)
+      return decrypted
+    } catch (error) {
+      console.log(`[Profile] Decrypt attempt with keyID "${keyID}" failed, trying next...`)
+    }
+  }
+
+  console.warn(`[Profile] Failed to decrypt field "${fieldName}" with all keyID formats`)
+  return null
+}
+
+interface SocialCertIdentity {
+  name: string
+  avatarURL: string | null
+}
+
+// Create IdentityClient with our shared walletClient for proper decryption
+const identityClient = new IdentityClient(walletClient)
 
 export default function Profile() {
   const [copied, setCopied] = useState(false)
   const [hoveredCard, setHoveredCard] = useState<string | null>(null)
   const [hoveredActivity, setHoveredActivity] = useState<number | null>(null)
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
+
+  // Identity resolution state
+  const [socialCertIdentity, setSocialCertIdentity] = useState<SocialCertIdentity | null>(null)
+  const [isResolvingIdentity, setIsResolvingIdentity] = useState(false)
+
   const isMobile = useIsMobile()
   const { identityKey, isConnected, isConnecting, connect, disconnect } = useWallet()
 
-  const shortAddress = identityKey ? `${identityKey.slice(0, 6)}...${identityKey.slice(-4)}` : ''
+  // Track if we've already attempted resolution
+  const hasAttemptedResolution = useRef(false)
+
+  // Load cached identity from localStorage on mount AND auto-resolve if not cached
+  useEffect(() => {
+    if (!identityKey) {
+      setSocialCertIdentity(null)
+      hasAttemptedResolution.current = false
+      return
+    }
+
+    // Clear any old/incomplete cache and always fetch fresh
+    const cacheKey = `socialcert_${identityKey}`
+    localStorage.removeItem(cacheKey) // Always clear cache to get fresh data
+
+    // Auto-resolve identity (only once per identity key)
+    if (!hasAttemptedResolution.current) {
+      hasAttemptedResolution.current = true
+      autoResolveIdentity(identityKey)
+    }
+  }, [identityKey])
+
+  // Auto-resolve identity using multiple methods
+  const autoResolveIdentity = async (key: string) => {
+    setIsResolvingIdentity(true)
+    console.log('[Profile] Auto-resolving identity for:', key)
+
+    const xCertType = 'vdDWvftf1H+5+ZprUw123kjHlywH+v20aPQTuXgMpNc='
+
+    try {
+      // Method 1: Get user's OWN certificates and decrypt fields manually
+      console.log('[Profile] Method 1: Trying walletClient.listCertificates with manual decryption...')
+      try {
+        const listResult = await walletClient.listCertificates({
+          certifiers: [],
+          types: [xCertType],
+          privileged: true,
+          privilegedReason: 'Display your identity on your profile'
+        })
+        console.log('[Profile] listCertificates result:', listResult)
+
+        if (listResult?.certificates?.length > 0) {
+          for (const cert of listResult.certificates) {
+            console.log('[Profile] Certificate found:', cert)
+            console.log('[Profile] cert.fields:', cert.fields)
+            console.log('[Profile] cert.fields keys:', cert.fields ? Object.keys(cert.fields) : 'none')
+            console.log('[Profile] cert.serialNumber:', cert.serialNumber)
+            console.log('[Profile] cert.certifier:', cert.certifier)
+            console.log('[Profile] cert.subject:', cert.subject)
+            console.log('[Profile] cert.keyring:', cert.keyring)
+            console.log('[Profile] cert.keyring keys:', cert.keyring ? Object.keys(cert.keyring) : 'none')
+
+            // Try to decrypt the fields using multiple approaches
+            if (cert.serialNumber && cert.certifier && cert.fields) {
+              let userName: string | null = null
+              let avatarURL: string | null = null
+
+              // APPROACH 1: If keyring exists, use revelation keys to decrypt
+              const keyring = cert.keyring as Record<string, string> | undefined
+              if (keyring && Object.keys(keyring).length > 0) {
+                console.log('[Profile] Attempting decryption using keyring revelation keys...')
+
+                // Try to decrypt userName using keyring
+                if (cert.fields.userName && keyring.userName) {
+                  // First decrypt the revelation key, then use it to decrypt the field
+                  const revelationKey = await decryptRevelationKey(
+                    keyring.userName,
+                    'userName',
+                    cert.serialNumber,
+                    cert.certifier
+                  )
+                  if (revelationKey) {
+                    userName = await decryptFieldWithKey(cert.fields.userName, revelationKey)
+                  }
+                }
+
+                // Try to decrypt profilePhoto/icon using keyring
+                const photoField = cert.fields.profilePhoto || cert.fields.icon
+                const photoKeyringKey = keyring.profilePhoto || keyring.icon
+                if (photoField && photoKeyringKey) {
+                  const fieldName = cert.fields.profilePhoto ? 'profilePhoto' : 'icon'
+                  const revelationKey = await decryptRevelationKey(
+                    photoKeyringKey,
+                    fieldName,
+                    cert.serialNumber,
+                    cert.certifier
+                  )
+                  if (revelationKey) {
+                    avatarURL = await decryptFieldWithKey(photoField, revelationKey)
+                  }
+                }
+              }
+
+              // APPROACH 2: Try direct wallet decryption if keyring approach didn't work
+              if (!userName) {
+                console.log('[Profile] Attempting direct wallet decryption...')
+
+                if (cert.fields.userName) {
+                  userName = await decryptCertificateField(
+                    cert.fields.userName,
+                    'userName',
+                    cert.serialNumber,
+                    cert.certifier
+                  )
+                }
+
+                if (!avatarURL) {
+                  const photoField = cert.fields.profilePhoto || cert.fields.icon
+                  const fieldName = cert.fields.profilePhoto ? 'profilePhoto' : 'icon'
+                  if (photoField) {
+                    avatarURL = await decryptCertificateField(
+                      photoField,
+                      fieldName,
+                      cert.serialNumber,
+                      cert.certifier
+                    )
+                  }
+                }
+              }
+
+              if (userName) {
+                console.log('[Profile] Successfully decrypted identity:', userName, avatarURL)
+                const identity = { name: userName, avatarURL }
+                setSocialCertIdentity(identity)
+                localStorage.setItem(`socialcert_${key}`, JSON.stringify(identity))
+                return
+              }
+            }
+
+            // APPROACH 3: Try proveCertificate to get revelation keys, then decrypt fields
+            if (!userName && cert.serialNumber) {
+              console.log('[Profile] Attempting proveCertificate for revelation keys...')
+              try {
+                // Get the list of field names to reveal
+                const fieldsToReveal = Object.keys(cert.fields || {}).filter(f =>
+                  ['userName', 'profilePhoto', 'icon', 'name'].includes(f)
+                )
+                console.log('[Profile] Fields to reveal:', fieldsToReveal)
+
+                if (fieldsToReveal.length > 0) {
+                  const proveResult = await walletClient.proveCertificate({
+                    certificate: cert,
+                    fieldsToReveal: fieldsToReveal,
+                    verifier: key
+                  })
+                  console.log('[Profile] proveCertificate result:', proveResult)
+
+                  // proveCertificate returns keyringForVerifier with revelation keys
+                  const keyringForVerifier = proveResult.keyringForVerifier
+                  if (keyringForVerifier) {
+                    console.log('[Profile] Got keyringForVerifier:', Object.keys(keyringForVerifier))
+
+                    // Use revelation keys to decrypt field values
+                    if (cert.fields.userName && keyringForVerifier.userName) {
+                      userName = await decryptFieldWithKey(cert.fields.userName, keyringForVerifier.userName)
+                    }
+                    if (!userName && cert.fields.name && keyringForVerifier.name) {
+                      userName = await decryptFieldWithKey(cert.fields.name, keyringForVerifier.name)
+                    }
+
+                    if (cert.fields.profilePhoto && keyringForVerifier.profilePhoto) {
+                      avatarURL = await decryptFieldWithKey(cert.fields.profilePhoto, keyringForVerifier.profilePhoto)
+                    }
+                    if (!avatarURL && cert.fields.icon && keyringForVerifier.icon) {
+                      avatarURL = await decryptFieldWithKey(cert.fields.icon, keyringForVerifier.icon)
+                    }
+                  }
+                }
+              } catch (proveErr) {
+                console.warn('[Profile] proveCertificate failed:', proveErr)
+              }
+            }
+
+            // Fallback: check if decryptedFields already exists (maybe from a newer SDK version)
+            if (!userName && cert.decryptedFields) {
+              const fields = cert.decryptedFields as Record<string, string>
+              userName = fields.userName || fields.name || null
+              avatarURL = fields.profilePhoto || fields.icon || null
+            }
+
+            if (userName) {
+              console.log('[Profile] Successfully resolved identity:', userName, avatarURL)
+              const identity = { name: userName, avatarURL }
+              setSocialCertIdentity(identity)
+              localStorage.setItem(`socialcert_${key}`, JSON.stringify(identity))
+              return
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('[Profile] listCertificates failed:', e)
+      }
+
+      // Method 2: Try IdentityClient (uses overlay network for publicly revealed certs)
+      console.log('[Profile] Method 2: Trying IdentityClient...')
+      try {
+        const matchingIdentities = await identityClient.resolveByIdentityKey({ identityKey: key })
+        console.log('[Profile] IdentityClient results:', matchingIdentities)
+
+        if (matchingIdentities?.length > 0) {
+          const socialCert = matchingIdentities.find(id =>
+            id.badgeClickURL === 'https://socialcert.net'
+          ) || matchingIdentities[0]
+
+          console.log('[Profile] Found via IdentityClient:', socialCert)
+          const identity = {
+            name: socialCert.name,
+            avatarURL: socialCert.avatarURL || null
+          }
+          setSocialCertIdentity(identity)
+          localStorage.setItem(`socialcert_${key}`, JSON.stringify(identity))
+          return
+        }
+      } catch (e) {
+        console.warn('[Profile] IdentityClient failed:', e)
+      }
+
+      // Method 3: Try discoverByIdentityKey (for publicly revealed certs)
+      console.log('[Profile] Method 3: Trying walletClient.discoverByIdentityKey...')
+      try {
+        const discoverResult = await walletClient.discoverByIdentityKey({ identityKey: key })
+        console.log('[Profile] discoverByIdentityKey result:', discoverResult)
+
+        if (discoverResult?.certificates?.length > 0) {
+          for (const cert of discoverResult.certificates) {
+            console.log('[Profile] Discovered certificate:', cert)
+            const fields = (cert as { decryptedFields?: Record<string, string> }).decryptedFields || {}
+            const name = fields.userName || fields.name
+            const avatarURL = fields.profilePhoto || fields.icon
+
+            if (name) {
+              console.log('[Profile] Found discovered identity:', name, avatarURL)
+              const identity = { name, avatarURL: avatarURL || null }
+              setSocialCertIdentity(identity)
+              localStorage.setItem(`socialcert_${key}`, JSON.stringify(identity))
+              return
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('[Profile] discoverByIdentityKey failed:', e)
+      }
+
+      console.log('[Profile] No identity found via any method')
+    } catch (error) {
+      console.error('[Profile] Identity resolution failed:', error)
+    } finally {
+      setIsResolvingIdentity(false)
+    }
+  }
+
+  // Manual identity resolution function - forces a fresh lookup
+  const handleResolveIdentity = useCallback(async () => {
+    if (!identityKey) return
+    hasAttemptedResolution.current = true
+    await autoResolveIdentity(identityKey)
+  }, [identityKey])
+
+  const shortAddress = identityKey ? abbreviateIdentityKey(identityKey) : ''
 
   const balance = 125.50
   const likedSongs = 23
@@ -278,7 +694,7 @@ export default function Profile() {
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
-          {/* Profile Header */}
+          {/* Profile Header with IdentityCard */}
           <div style={{
             padding: isMobile ? '20px' : '40px',
             borderRadius: isMobile ? '20px' : '32px',
@@ -295,32 +711,94 @@ export default function Profile() {
               gap: isMobile ? '16px' : '24px',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '14px' : '24px' }}>
-                {/* Avatar */}
+                {/* Profile Avatar - SocialCert or Default */}
                 <div style={{
-                  width: isMobile ? '64px' : '100px',
-                  height: isMobile ? '64px' : '100px',
-                  borderRadius: isMobile ? '18px' : '28px',
-                  background: 'linear-gradient(135deg, #9333ea 0%, #db2777 100%)',
+                  width: isMobile ? '70px' : '90px',
+                  height: isMobile ? '70px' : '90px',
+                  borderRadius: isMobile ? '18px' : '24px',
+                  overflow: 'hidden',
+                  boxShadow: '0 16px 48px rgba(147, 51, 234, 0.35)',
+                  background: socialCertIdentity?.avatarURL
+                    ? 'transparent'
+                    : 'linear-gradient(135deg, #9333ea 0%, #db2777 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 16px 48px rgba(147, 51, 234, 0.35)',
-                  flexShrink: 0,
+                  position: 'relative',
                 }}>
-                  <Wallet style={{ width: isMobile ? '28px' : '48px', height: isMobile ? '28px' : '48px', color: 'white' }} />
+                  {isResolvingIdentity ? (
+                    <Loader2 style={{
+                      width: isMobile ? '28px' : '36px',
+                      height: isMobile ? '28px' : '36px',
+                      color: 'white',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                  ) : socialCertIdentity?.avatarURL ? (
+                    <img
+                      src={socialCertIdentity.avatarURL}
+                      alt={socialCertIdentity.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                    />
+                  ) : (
+                    <User style={{
+                      width: isMobile ? '32px' : '40px',
+                      height: isMobile ? '32px' : '40px',
+                      color: 'white'
+                    }} />
+                  )}
                 </div>
 
-                {/* Info */}
+                {/* User Info & Actions */}
                 <div>
-                  <h1 style={{
-                    fontSize: isMobile ? '22px' : '36px',
-                    fontWeight: '800',
-                    margin: '0 0 8px 0',
-                    background: 'linear-gradient(135deg, #ffffff 0%, #a855f7 50%, #ec4899 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}>My Profile</h1>
+                  {/* Username or Identity Actions */}
+                  {socialCertIdentity ? (
+                    <div style={{
+                      fontSize: isMobile ? '20px' : '26px',
+                      fontWeight: '700',
+                      color: 'white',
+                      marginBottom: '8px',
+                    }}>
+                      {socialCertIdentity.name}
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                      {/* Load Identity Button */}
+                      <button
+                        onClick={handleResolveIdentity}
+                        disabled={isResolvingIdentity}
+                        onMouseEnter={() => setHoveredButton('resolve')}
+                        onMouseLeave={() => setHoveredButton(null)}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: '10px',
+                          border: '1px solid rgba(34, 197, 94, 0.4)',
+                          background: hoveredButton === 'resolve' ? 'rgba(34, 197, 94, 0.15)' : 'transparent',
+                          color: '#22c55e',
+                          fontSize: isMobile ? '13px' : '14px',
+                          fontWeight: '600',
+                          cursor: isResolvingIdentity ? 'not-allowed' : 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          transition: 'all 0.2s ease',
+                          opacity: isResolvingIdentity ? 0.6 : 1,
+                        }}
+                      >
+                        {isResolvingIdentity ? (
+                          <Loader2 style={{ width: 16, height: 16, animation: 'spin 1s linear infinite' }} />
+                        ) : (
+                          <RefreshCw style={{ width: 16, height: 16 }} />
+                        )}
+                        {isResolvingIdentity ? 'Loading...' : 'Load Identity'}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Wallet Address */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '12px' }}>
                     <span style={{
                       fontFamily: 'monospace',
